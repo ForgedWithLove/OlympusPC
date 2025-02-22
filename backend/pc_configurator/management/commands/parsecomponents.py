@@ -1418,17 +1418,28 @@ class Command(BaseCommand):
             print(Fore.CYAN + 'Starting initial data insertion...')
             initial_data_insertion()
             # Задаём базовые ссылки для парсинга
-            url = 'https://www.regard.ru'
-            processor_path = '/catalog/1001/processory'
-            motherboard_path = '/catalog/1000/materinskie-platy'
-            videocard_path = '/catalog/1013/videokarty'
-            case_path = '/catalog/1032/korpusa'
-            powersupply_path = '/catalog/1225/bloki-pitaniya'
-            memory_path = '/catalog/1010/operativnaya-pamyat'
-            cooler_path = '/catalog/5162/kulery-dlya-processorov'
-            casecooler_path = '/catalog/1004/ventilyatory-dlya-korpusa'
-            ssd_path = '/catalog/1015/nakopiteli-ssd'
-            hdd_path = '/catalog/1014/zhestkie-diski-hdd'
+            url = os.getenv('BASE_URL')
+            processor_path = os.getenv('PROCESSOR_PATH')
+            motherboard_path = os.getenv('MOTHERBOARD_PATH')
+            videocard_path = os.getenv('VIDEOCARD_PATH')
+            case_path = os.getenv('CASE_PATH')
+            powersupply_path = os.getenv('POWERSUPPLY_PATH')
+            memory_path = os.getenv('MEMORY_PATH')
+            cooler_path = os.getenv('COOLER_PATH')
+            casecooler_path = os.getenv('CASECOOLER_PATH')
+            ssd_path = os.getenv('SSD_PATH')
+            hdd_path = os.getenv('HDD_PATH')
+            # Задаём фильтры для парсинга
+            processor_filter = os.getenv('PROCESSOR_FILTER')
+            motherboard_filter = os.getenv('MOTHERBOARD_FILTER')
+            videocard_filter = os.getenv('VIDEOCARD_FILTER')
+            case_filter = os.getenv('CASE_FILTER')
+            powersupply_filter = os.getenv('POWERSUPPLY_FILTER')
+            memory_filter = os.getenv('MEMORY_FILTER')
+            cooler_filter = os.getenv('COOLER_FILTER')
+            casecooler_filter = os.getenv('CASECOOLER_FILTER')
+            ssd_filter = os.getenv('SSD_FILTER')
+            hdd_filter = os.getenv('HDD_FILTER')
             # Создаём объект веб-интерфейса
             interface = Api(url)
             # Отмечаем незаполненные таблицы в БД
@@ -1474,25 +1485,25 @@ class Command(BaseCommand):
             for component_type in component_types:
                 print(Fore.CYAN + f"Parsing {component_type}...")
                 if component_type == 'processor':
-                    interface.parse_components('processor', processor_path, '', ['link', 'price'])
+                    interface.parse_components('processor', processor_path, processor_filter, ['link', 'price'])
                 elif component_type == 'motherboard':
-                    interface.parse_components('motherboard', motherboard_path, 'eyJieUNoYXIiOnsiMjQ5Ijp7InZhbHVlcyI6WzM2NTUxLDEyODc4LDEwNzZdLCJleGNlcHQiOnRydWV9fSwiYnlQcmljZSI6eyJtaW4iOjEwMDAwLCJtYXgiOjE2MDY4MH19', ['backports', 'internal_usb', 'connectors', 'link', 'price'])
+                    interface.parse_components('motherboard', motherboard_path, motherboard_filter, ['backports', 'internal_usb', 'connectors', 'link', 'price'])
                 elif component_type == 'videocard':
-                    interface.parse_components('videocard', videocard_path, '', ['backports', 'power_pins', 'link', 'price', 'exp_slots', 'bandwidth'])
+                    interface.parse_components('videocard', videocard_path, videocard_filter, ['backports', 'power_pins', 'link', 'price', 'exp_slots', 'bandwidth'])
                 elif component_type == 'memory':
-                    interface.parse_components('memory', memory_path, 'eyJieUNoYXIiOnsiNDgiOnsidmFsdWVzIjpbMTc4XSwiZXhjZXB0IjpmYWxzZX0sIjUxIjp7InZhbHVlcyI6WzE4MF0sImV4Y2VwdCI6ZmFsc2V9fSwiYnlQcmljZSI6eyJtaW4iOjIwMDAsIm1heCI6NzAyNDB9fQ', ['link', 'price'])
+                    interface.parse_components('memory', memory_path, memory_filter, ['link', 'price'])
                 elif component_type == 'cooler':
-                    interface.parse_components('cooler', cooler_path, 'eyJieUNoYXIiOnsiNTQ5Ijp7InZhbHVlcyI6WzI4MTFdLCJleGNlcHQiOmZhbHNlfSwiMTAyODAiOnsidmFsdWVzIjpbNDIzNjJdLCJleGNlcHQiOmZhbHNlLCJjb3VudGVyIjp7IjQyMzYyIjoxfX19LCJieVByaWNlIjp7Im1pbiI6MTAwMCwibWF4IjoxNDM0MH19', ['link', 'price', 'sockets'])
+                    interface.parse_components('cooler', cooler_path, cooler_filter, ['link', 'price', 'sockets'])
                 elif component_type == 'case':
-                    interface.parse_components('case', case_path, 'eyJieUNoYXIiOnsiNjAiOnsiZXhjZXB0IjpmYWxzZX0sIjkzIjp7ImV4Y2VwdCI6ZmFsc2V9LCI5NSI6eyJ2YWx1ZXMiOlsxNTIwXSwiZXhjZXB0IjpmYWxzZX19LCJieVByaWNlIjp7Im1pbiI6NTAwMCwibWF4Ijo5Mjc1MH19', ['front_interfaces', 'cooler_slots', 'link', 'price', 'installed_coolers', 'mb_ffs', 'psu_typesize'])
+                    interface.parse_components('case', case_path, case_filter, ['front_interfaces', 'cooler_slots', 'link', 'price', 'installed_coolers', 'mb_ffs', 'psu_typesize'])
                 elif component_type == 'ssd':
-                    interface.parse_components('ssd', ssd_path, 'eyJieUNoYXIiOnsiNTUyMiI6eyJ2YWx1ZXMiOlsyNjU0OV0sImV4Y2VwdCI6dHJ1ZX19LCJieVByaWNlIjp7Im1pbiI6NDAwMCwibWF4IjoxOTUyNzB9fQ', ['link', 'price'])
+                    interface.parse_components('ssd', ssd_path, ssd_filter, ['link', 'price'])
                 elif component_type == 'hdd':
-                    interface.parse_components('hdd', hdd_path, '', ['link', 'price'])
+                    interface.parse_components('hdd', hdd_path, hdd_filter, ['link', 'price'])
                 elif component_type == 'casecooler':
-                    interface.parse_components('casecooler', casecooler_path, 'eyJieUNoYXIiOnsiMjU3MyI6eyJ2YWx1ZXMiOls2ODE5XSwiZXhjZXB0IjpmYWxzZX0sIjI1NzQiOnsidmFsdWVzIjpbNjg1Miw2ODIxXSwiZXhjZXB0IjpmYWxzZX0sIjI1NzkiOnsidmFsdWVzIjpbMjQyOTcsODkwMCw2ODQ1XSwiZXhjZXB0Ijp0cnVlLCJjb3VudGVyIjp7IjY4NDUiOjEsIjg5MDAiOjEsIjI0Mjk3IjoxfX19LCJieVByaWNlIjp7Im1pbiI6NTAwLCJtYXgiOjE2MDcwfX0', ['link', 'price'])
+                    interface.parse_components('casecooler', casecooler_path, casecooler_filter, ['link', 'price'])
                 elif component_type == 'powersupply':
-                    interface.parse_components('powersupply', powersupply_path, 'eyJieUNoYXIiOnsiMTY2Ijp7ImV4Y2VwdCI6ZmFsc2V9LCI0MzMiOnsidmFsdWVzIjpbMjc3NV0sImV4Y2VwdCI6dHJ1ZX0sIjQzNCI6eyJleGNlcHQiOmZhbHNlfSwiOTg2MiI6eyJleGNlcHQiOmZhbHNlfX0sImJ5UHJpY2UiOnsibWluIjo0MDAwLCJtYXgiOjU3MTAwfX0', ['link', 'price', 'connectors'])
+                    interface.parse_components('powersupply', powersupply_path, powersupply_filter, ['link', 'price', 'connectors'])
             print(Fore.GREEN + 'Parsing completed!')
         elif to_run == 'skip':
             print(Fore.CYAN + "Skipping initial data insertion.")
