@@ -17,7 +17,7 @@ from colorama import Fore
 
 SLEEP_WHILE_LOADING = 5 # Время ожидания загрузки страницы
 
-# Функция возвращает словарь, в котором каждому компоненту соответствует его рейтинг производительности.
+# Функция для поиска значений сравнительной производительности компонентов в одной категории
 def get_component_rates(component_type: str):
     rates = {}
     cpu_arr = []
@@ -71,6 +71,7 @@ def merge_lists(ilist):
     return out
 
 class Api:
+    # Инициализация объекта и сбор производительности компонентов всех нужных категорий
     def __init__(self, url: str):
         self.url = url
         high = get_component_rates('cpu_high_end')
@@ -132,7 +133,7 @@ class Api:
             links.append(self.get_component_links(link))
         return merge_lists(links)
 
-    # Функция, возвращающая рейтинг производительности компонента (процессоров и видеокарт)
+    # Функция, возвращающая рейтинг производительности компонента по модели
     def get_rate_by_model(self, component_type: str, rates: dict, component: dict):
         if component_type == "cpu":
             for model in list(rates.keys()):
@@ -178,6 +179,7 @@ class Api:
         lst['link'] = url
         return lst
 
+    # Корректная обработка строки, содержащей размеры кулеров и их количество
     def cooler_mapping(self, sizes: list):
         lst = list(map(lambda x: int(x), sizes))
         if len(lst) > 2:
@@ -195,7 +197,7 @@ class Api:
         else:
             return {'Размер' : lst[1], 'Количество' : lst[0]}
 
-
+    # Расширение функции get_component_info для корректного поиска и сбора информации о слотах для кулеров
     def get_component_info_case_extension(self, url: str, valid_keys: dict, string_fields: list, integer_fields: list, boolean_fields: list):
         keys = []
         values = []
@@ -293,6 +295,7 @@ class Api:
                 lst[port[0]] = 1
         return lst
 
+    # Сбор данных о процессоре со страницы
     def get_processor_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -329,6 +332,7 @@ class Api:
         else:
             return {}
 
+    # Сбор данных о материнской плате со страницы
     def get_motherboard_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -465,6 +469,7 @@ class Api:
         motherboard['connectors'] = json.dumps(lst, sort_keys=True)
         return motherboard
 
+    # Сбор данных о видеокарте со страницы
     def get_videocard_info(self, url: str):
         valid_keys = {
 
@@ -556,6 +561,7 @@ class Api:
         else:
             return {}
 
+    # Сбор данных о корпусе со страницы
     def get_case_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -640,6 +646,7 @@ class Api:
             pass
         return case
 
+    # Сбор данных о блоке питания со страницы
     def get_powersupply_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -761,6 +768,7 @@ class Api:
         psu['connectors'] = json.dumps(lst, sort_keys=True)
         return psu
 
+    # Сбор данных об оперативной памяти со страницы
     def get_memory_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -798,6 +806,7 @@ class Api:
             return {}
         return memory
 
+    # Сбор данных о кулере со страницы (!!! Не поддерживается водяное охлаждение !!!)
     def get_air_cooler_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -840,6 +849,7 @@ class Api:
         air_cooler['coolant'] = 'air'
         return air_cooler
 
+    # Сбор данных о корпусном вентиляторе со страницы
     def get_casecooler_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -894,6 +904,7 @@ class Api:
             return {}
         return air_cooler
 
+    # Сбор данных о твердотельном накопителе со страницы
     def get_ssd_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -933,6 +944,7 @@ class Api:
             return {}
         return disc
 
+    # Сбор данных о жестком диске со страницы
     def get_hdd_info(self, url: str):
         valid_keys = {
             'Производитель' : 'manufacturer',
@@ -991,6 +1003,7 @@ class Api:
         new_components.sort()
         return list(map(lambda x: comp_list[x], new_components))
 
+    # Сбор и сохранение в БД информации о комплектующих одного типа
     def parse_components(self, component_type: str, component_path: str, qfilter: str, uid_ignored_fields: list):
         components = []
         counter = 0
@@ -1076,6 +1089,7 @@ class Api:
                 raise ValueError('Wrong component type!')
         print(Fore.MAGENTA + 'Components saved.')
 
+# Функция, возвращающая идентификатор производителя в БД по имени (если производитель не найден, то он создаётся).
 def get_or_add_manufacturer(manufacturer: str):
         manufacturers = [name.upper() for name in Manufacturer.objects.values_list('name', flat=True)]
         uman = manufacturer.upper()
@@ -1085,6 +1099,7 @@ def get_or_add_manufacturer(manufacturer: str):
             man = Manufacturer.objects.get(name = uman)
         return man
 
+# Сохранение данных о процессоре
 def save_processor(processor: dict):
     try:
         comp = Processor(
@@ -1110,6 +1125,7 @@ def save_processor(processor: dict):
         print(Fore.RED + f'Error occured while saving processor: {processor}')
         raise KeyError
 
+# Сохранение данных о материнской плате
 def save_motherboard(motherboard: dict):
     try:
         comp = Motherboard(
@@ -1138,6 +1154,7 @@ def save_motherboard(motherboard: dict):
         print(Fore.RED + f'Error occured while saving motherboard: {motherboard}')
         raise KeyError
 
+# Сохранение данных о видеокарте
 def save_videocard(videocard: dict):
     try:
         comp = Videocard(
@@ -1168,6 +1185,7 @@ def save_videocard(videocard: dict):
         print(Fore.RED + f'Error occured while saving videocard: {videocard}')
         raise KeyError
 
+# Сохранение данных о корпусе
 def save_case(case: dict):
     try:
         comp = Case(
@@ -1198,6 +1216,7 @@ def save_case(case: dict):
         print(Fore.RED + f'Error occured while saving case: {case}')
         raise KeyError
 
+# Сохранение данных об оперативной памяти
 def save_memory(memory: dict):
     try:
         comp = Memory(
@@ -1216,6 +1235,7 @@ def save_memory(memory: dict):
         print(Fore.RED + f'Error occured while saving memory: {memory}')
         raise KeyError
 
+# Сохранение данных о кулере
 def save_cooler(cooler: dict):
     try:
         comp = Cooler(
@@ -1237,6 +1257,7 @@ def save_cooler(cooler: dict):
         print(Fore.RED + f'Error occured while saving cooler: {cooler}')
         raise KeyError
 
+# Сохранение данных о твердотельном накопителе
 def save_ssd(ssd: dict):
     try:
         comp = Disc(
@@ -1254,6 +1275,7 @@ def save_ssd(ssd: dict):
         print(Fore.RED + f'Error occured while saving ssd: {ssd}')
         raise KeyError
 
+# Сохранение данных о жестком диске
 def save_hdd(hdd: dict):
     try:
         comp = Disc(
@@ -1271,6 +1293,7 @@ def save_hdd(hdd: dict):
         print(Fore.RED + f'Error occured while saving hdd: {hdd}')
         raise KeyError
 
+# Сохранение данных о корпусном вентиляторе
 def save_casecooler(casecooler: dict):
     try:
         comp = CaseCooler(
@@ -1289,6 +1312,7 @@ def save_casecooler(casecooler: dict):
         print(Fore.RED + f'Error occured while saving casecooler: {casecooler}')
         raise KeyError
 
+# Сохранение данных о блоке питания
 def save_powersupply(powersupply: dict):
     try:
         comp = PowerSupply(
@@ -1309,6 +1333,7 @@ def save_powersupply(powersupply: dict):
         print(Fore.RED + f'Error occured while saving powersupply: {powersupply}')
         raise KeyError
 
+# Вставка обязательных для парсинга данных (типы накопителей, сертификаты блоков питания и встроенный корпусный кулер)
 def initial_data_insertion():
     disc_types = DiscType.objects.all().count()
     if disc_types > 0:
@@ -1392,7 +1417,7 @@ class Command(BaseCommand):
         if to_run == 'exec':
             print(Fore.CYAN + 'Starting initial data insertion...')
             initial_data_insertion()
-            
+            # Задаём базовые ссылки для парсинга
             url = 'https://www.regard.ru'
             processor_path = '/catalog/1001/processory'
             motherboard_path = '/catalog/1000/materinskie-platy'
@@ -1404,9 +1429,9 @@ class Command(BaseCommand):
             casecooler_path = '/catalog/1004/ventilyatory-dlya-korpusa'
             ssd_path = '/catalog/1015/nakopiteli-ssd'
             hdd_path = '/catalog/1014/zhestkie-diski-hdd'
-
+            # Создаём объект веб-интерфейса
             interface = Api(url)
-
+            # Отмечаем незаполненные таблицы в БД
             component_types = []
             if Processor.objects.all().count() == 0:
                 component_types.append('processor')
@@ -1445,6 +1470,7 @@ class Command(BaseCommand):
                 component_types.append('ssd')
             else:
                 print(Fore.YELLOW + 'Skipping disc...')
+            # Парсим данные в незаполненные таблицы 
             for component_type in component_types:
                 print(Fore.CYAN + f"Parsing {component_type}...")
                 if component_type == 'processor':
