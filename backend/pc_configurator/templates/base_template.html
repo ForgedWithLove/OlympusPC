@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<head>
+  {% block title %}<title>OLYMPUS PC</title>{% endblock %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+  {% load static %}
+  <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- Добавление дополнительного статического CSS файла -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  {% load static %}
+  <style>
+    @font-face {
+      font-family: 'ChoplinMedium';
+      src: local('ChoplinMedium'),
+           url('{% static 'fonts/ChoplinMedium.ttf' %} format("truetype")');
+    }
+  </style>
+</head>
+
+<body>
+  <div class="navbar">
+    <div id="navbar_logo">
+      {% load static %}
+      <img src="{% static 'images/logo.png' %}" alt="logo" style="width:auto;height:80px;" >
+    </div>
+  </div>
+  {% block content %}{% endblock %}
+</body>
+</html>

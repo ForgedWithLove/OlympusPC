@@ -1,0 +1,28 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="content">
+    <div id="components_panel">
+     
+    </div>
+    <div class="field">
+        <div style="display: flex; align-items: center; justify-content: center; padding: 20px; background-color: purple;">
+            <div style="background-color: blue; contain: layout; display: inline-block;">
+                {% load static %}
+                <img src="{% static 'images/comp.png' %}" alt="PC" style="width:400px;height:auto;" >
+                <div class="component_dark" id="motherboard">
+                    <button class="component_add_button_dark" id="motherboard_button">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="chars_panel">
+
+    </div>
+</div>
+<div>
+    Тут когда-нибудь будет шедевр
+</div>
+{% load static %}
+<script src="{% static 'javascript/configurator.js' %}"></script>
+{% endblock %}

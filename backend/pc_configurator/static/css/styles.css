@@ -1,0 +1,130 @@
+.navbar {
+    width: 100vw;
+    height: 80px;
+    background-color: #2E8A6C;  
+    border-radius: 0px;
+    position: sticky;
+    top: 0px;
+    margin: 0px;
+}
+
+#navbar_logo {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    flex-direction: row;
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100vw;
+    background-color: #FF9966;
+    margin: 0px;
+    padding: 0px;
+}
+
+.field {
+    background-color: lightseagreen;
+    flex-grow: 1;
+    height: calc(100vh - 80px);
+    min-width: min-content;
+    min-height: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#components_panel {
+    width: 500px;
+    background-color: brown;
+    min-width: 500px;
+}
+
+#chars_panel {
+    width: 500px;
+    background-color: greenyellow;
+}
+
+.component_light {
+    position: fixed;
+    background-color: #8ED4BD29;
+    transition: 0.35s;
+}
+
+.component_light_hovered {
+    position: fixed;
+    background-color: #8ED4BD79;
+    transition: 0.35s;
+}
+
+.component_dark {
+    position: fixed;
+    background-color: #FF996625;
+    transition: 0.35s;
+}
+
+.component_dark_hovered {
+    position: fixed;
+    background-color: #FF9966AF;
+    transition: 0.35s;
+}
+
+.component_add_button_light{
+    width: 36px;
+    height: 36px;
+    position: fixed;
+    border: 2px solid;
+    border-radius: 18px;
+    background-color: #8ED4BDA4;
+    border: 2px solid #8ED4BDA4;
+    transition: 0.35s;
+}
+
+.component_add_button_light_hovered{
+    width: 36px;
+    height: 36px;
+    position: fixed;
+    border: 2px solid;
+    border-radius: 18px;
+    background-color: #8ED4BD;
+    border: 2px solid #2E8A6C;
+    transition: 0.35s;
+    
+}
+
+.component_add_button_dark{
+    width: 36px;
+    height: 36px;
+    position: fixed;
+    border: 2px solid;
+    border-radius: 18px;
+    background-color: #FF9966AF;
+    border: 2px solid #454545;
+    transition: 0.35s;
+}
+
+.component_add_button_dark_hovered{
+    width: 36px;
+    height: 36px;
+    position: fixed;
+    border: 2px solid;
+    border-radius: 18px;
+    background-color: #FF9966;
+    border: 2px solid #454545;
+    transition: 0.35s;
+}
+  
+#motherboard {
+    top: 69px;
+    left: 26px;
+    border-radius: 4px;
+    width: 207px;
+    height: 270px;
+}
+
+#motherboard_button {
+    left: 214px;
+    top: 52px;
+}
