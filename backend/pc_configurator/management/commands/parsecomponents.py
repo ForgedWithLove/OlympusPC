@@ -13,9 +13,8 @@ import requests
 import time
 import json
 import math
+import random
 from colorama import Fore
-
-SLEEP_WHILE_LOADING = 5 # Время ожидания загрузки страницы
 
 # Функция для поиска значений сравнительной производительности компонентов в одной категории
 def get_component_rates(component_type: str):
@@ -104,7 +103,7 @@ class Api:
         #chrome_options.add_argument('--disable-dev-shm-usage') # Аргумент запрещает использовать буфер ОП для выгрузки страницы, вместо этого используется /tmp на диске.
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(path)
-        time.sleep(SLEEP_WHILE_LOADING)
+        time.sleep(random.randrange(5.0, 5.5, 0.02))
         html_source = driver.page_source
         driver.close()
         return html_source
@@ -1007,7 +1006,6 @@ class Api:
     def parse_components(self, component_type: str, component_path: str, qfilter: str, uid_ignored_fields: list):
         components = []
         counter = 0
-        start = time.time()
         parsed = False
         links = self.collect_component_links(component_path, qfilter)
         control_count = len(links)
