@@ -1,0 +1,12 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+    <div id="comp_content">
+        <div id="comp_filter_bar">
+            {% block filters %}{% endblock %}
+        </div>
+        <div id="comp_list">
+            {% block components %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

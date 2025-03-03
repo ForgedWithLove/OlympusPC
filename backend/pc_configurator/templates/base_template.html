@@ -16,20 +16,26 @@
   {% load static %}
   <style>
     @font-face {
-      font-family: 'ChoplinMedium';
-      src: local('ChoplinMedium'),
-           url('{% static 'fonts/ChoplinMedium.ttf' %} format("truetype")');
+      font-family: FuturaBookNormalRegular;
+      src: url('{% static 'fonts/FuturaBookNormalRegular.woff2' %}') format('woff2'),
+           url('{% static 'fonts/FuturaBookNormalRegular.ttf' %}') format('truetype');
     }
   </style>
 </head>
 
 <body>
-  <div class="navbar">
-    <div id="navbar_logo">
-      {% load static %}
-      <img src="{% static 'images/logo.png' %}" alt="logo" style="width:auto;height:80px;" >
+  <div style="display: flex; flex-direction: row; justify-content: center; font-family: FuturaBookNormalRegular;">
+    <div style="width: auto;"></div>
+    <div style="display: flex; flex-direction: column; width: auto; min-width: min(1400px, 100vw);">
+      <div id="navbar">
+        <div id="navbar_logo_container">
+          {% load static %}
+          <img src="{% static 'images/logo.png' %}" alt="logo" id="navbar_logo" >
+        </div>
+      </div>
+      {% block content %}{% endblock %}
     </div>
+    <div style="width: auto;"></div>
   </div>
-  {% block content %}{% endblock %}
 </body>
 </html>

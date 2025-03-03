@@ -9,6 +9,9 @@ class Manufacturer(models.Model):
     description = models.TextField(blank=True)
     official_site = models.CharField(max_length=64, null=True)
 
+    def __str__(self):
+        return f"{self.name}"
+
 # Таблица типов накопителей данных
 class DiscType(models.Model):
     id = models.AutoField(primary_key=True)
@@ -16,12 +19,18 @@ class DiscType(models.Model):
     interface = models.CharField(max_length=10)
     slot = models.CharField(max_length=10)
 
+    def __str__(self):
+        return f"{self.name}"
+
 # Таблица сертификатов БП 80 PLUS
 class Certificate(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=16)
     power_ratio = models.PositiveSmallIntegerField(default=80)
-    icon = models.ImageField(null=True)
+    icon = models.ImageField(upload_to='certificates', null=True)
+
+    def __str__(self):
+        return f"{self.name}"
 
 # Таблица процессоров
 class Processor(models.Model):
@@ -42,10 +51,14 @@ class Processor(models.Model):
     price = models.IntegerField()
     link = models.TextField()
     rating= models.IntegerField(null=True)
+    image = models.ImageField(upload_to='components/processor', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.series} {self.model}"
 
 # Таблица материнских плат
 class Motherboard(models.Model):
@@ -69,10 +82,14 @@ class Motherboard(models.Model):
     backports = models.JSONField()
     price = models.IntegerField()
     link = models.TextField()
+    image = models.ImageField(upload_to='components/motherboard', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица видеокарт
 class Videocard(models.Model):
@@ -98,10 +115,14 @@ class Videocard(models.Model):
     price = models.IntegerField()
     link = models.TextField()
     rating = models.IntegerField(null=True)
+    image = models.ImageField(upload_to='components/videocard', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица модулей оператитвной памяти
 class Memory(models.Model):
@@ -115,10 +136,14 @@ class Memory(models.Model):
     latency = models.PositiveSmallIntegerField()
     price = models.IntegerField()
     link = models.TextField()
+    image = models.ImageField(upload_to='components/memory', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица процессорных кулеров
 class Cooler(models.Model):
@@ -135,10 +160,14 @@ class Cooler(models.Model):
     noise_level = models.FloatField()
     price = models.IntegerField()
     link = models.TextField()
+    image = models.ImageField(upload_to='components/cooler', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица компьютерных корпусов
 class Case(models.Model):
@@ -164,10 +193,14 @@ class Case(models.Model):
     mass = models.CharField(max_length=5, null=True)
     price = models.IntegerField()
     link = models.TextField()
+    image = models.ImageField(upload_to='components/case', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица накопителей данных
 class Disc(models.Model):
@@ -180,10 +213,14 @@ class Disc(models.Model):
     wr_speed = models.IntegerField(null=True)
     price = models.IntegerField()
     link = models.TextField()
+    image = models.ImageField(upload_to='components/disc', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица корпусных кулеров
 class CaseCooler(models.Model):
@@ -197,10 +234,14 @@ class CaseCooler(models.Model):
     connector_pins = models.CharField(max_length=16, null=True)
     price = models.IntegerField()
     link = models.TextField(null=True)
+    image = models.ImageField(upload_to='components/casecooler', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица блоков питания
 class PowerSupply(models.Model):
@@ -216,10 +257,14 @@ class PowerSupply(models.Model):
     length = models.PositiveSmallIntegerField(null=True)
     price = models.IntegerField()
     link = models.TextField()
+    image = models.ImageField(upload_to='components/powersupply', null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     manual = models.BooleanField(default=False)
     parser_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.manufacturer.name} {self.model}"
 
 # Таблица сборок
 class Computer(models.Model):
@@ -244,11 +289,14 @@ class Computer(models.Model):
     temporary = models.BooleanField(default=True)
     valid = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"({self.id}) {self.name} - {self.user.username}"
+
 # Таблица приложений
 class App(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=64)
-    icon = models.ImageField()
+    icon = models.ImageField(upload_to='apps', null=True)
     min_cpu_model = models.ForeignKey(Processor, on_delete=models.PROTECT, null=True, related_name='min_cpu') 
     min_cpu_cores = models.PositiveSmallIntegerField(null=True)
     min_cpu_freq = models.IntegerField(null=True)
@@ -264,6 +312,9 @@ class App(models.Model):
     rec_ram_volume = models.PositiveSmallIntegerField(null=True)
     rec_ssd = models.BooleanField(default=False)
     disc_space = models.IntegerField(null=True)
+
+    def __str__(self):
+        return f"{self.name}"
 
 # Таблица - архив недоступных комплектующих, подлежащих удалению
 class ComponentArchive(models.Model):

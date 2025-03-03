@@ -19,6 +19,9 @@ services:
         entrypoint: /app/docker/backend/server-entrypoint.sh
         volumes:
             - static_volume:/app/backend/django_static
+            - type: bind
+              source: backend/pc_configurator/media
+              target: /app/backend/pc_configurator/media
         expose:
             - 8000     
         environment:

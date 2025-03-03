@@ -14,7 +14,10 @@ import time
 import json
 import math
 import random
+import copy
+import urllib.request
 from colorama import Fore
+from django.db import transaction
 
 # Функция для поиска значений сравнительной производительности компонентов в одной категории
 def get_component_rates(component_type: str):
@@ -103,7 +106,7 @@ class Api:
         #chrome_options.add_argument('--disable-dev-shm-usage') # Аргумент запрещает использовать буфер ОП для выгрузки страницы, вместо этого используется /tmp на диске.
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(path)
-        time.sleep(random.randrange(5.0, 5.5, 0.02))
+        time.sleep(round(random.uniform(5.0, 5.5), 2))
         html_source = driver.page_source
         driver.close()
         return html_source
@@ -175,6 +178,10 @@ class Api:
             lst['price'] = int(soup.select('.PriceBlock_price__j_PbO > span:nth-child(1)')[0].text.replace('\xa0', '').replace('RUB', '').replace(',', ''))
         except IndexError:
             lst['price'] = 0
+        try:
+            lst['image_url'] = self.url + soup.select('.BigSlider_slide__image__2qjPm')[0]['src']
+        except IndexError:
+            return {}
         lst['link'] = url
         return lst
 
@@ -281,6 +288,10 @@ class Api:
                 mounted[mounted_keys[i]] = mounted_values[i]
         lst['cooler_slots'] = json.dumps(expanded, sort_keys=True)
         lst['installed_coolers'] = json.dumps(mounted, sort_keys=True)
+        try:
+            lst['image_url'] = self.url + soup.select('.BigSlider_slide__image__2qjPm')[0]['src']
+        except IndexError:
+            return {}
         return lst
 
     # Функция, формирующая из строки список портов в заданном формате
@@ -495,7 +506,10 @@ class Api:
         integer_fields = ['max_monitors']
         boolean_fields = []
         videocard = self.get_component_info(url, valid_keys, string_fields, integer_fields, boolean_fields)
-        videocard['chip'] = videocard['chip'].replace('Super', 'SUPER')
+        try:
+            videocard['chip'] = videocard['chip'].replace('Super', 'SUPER')
+        except KeyError:
+            return {}
         try:
             videocard['mem_type'] = videocard['PROCESS_mem_type'].split(', ')[0]
             del videocard['PROCESS_mem_type']
@@ -513,10 +527,16 @@ class Api:
             del videocard['PROCESS_boost_freq']
         except KeyError:
             pass
-        videocard['mem_volume'] = int(videocard['PROCESS_mem_volume'].split()[0])
-        del videocard['PROCESS_mem_volume']
-        videocard['bus_width'] = int(videocard['PROCESS_bus_width'].split()[0])
-        del videocard['PROCESS_bus_width']
+        try:
+            videocard['mem_volume'] = int(videocard['PROCESS_mem_volume'].split()[0])
+            del videocard['PROCESS_mem_volume']
+        except KeyError:
+            return {}
+        try:
+            videocard['bus_width'] = int(videocard['PROCESS_bus_width'].split()[0])
+            del videocard['PROCESS_bus_width']
+        except KeyError:
+            return {}
         try:
             videocard['coolers'] = int(videocard['PROCESS_coolers'].split(',')[0])
             del videocard['PROCESS_coolers']
@@ -527,8 +547,11 @@ class Api:
             del videocard['PROCESS_bandwidth']
         except KeyError:
             pass
-        videocard['backports'] = json.dumps(self.collect_ports(videocard['PROCESS_backports']), sort_keys=True)
-        del videocard['PROCESS_backports']
+        try:
+            videocard['backports'] = json.dumps(self.collect_ports(videocard['PROCESS_backports']), sort_keys=True)
+            del videocard['PROCESS_backports']
+        except KeyError:
+            return {}
         try:
             connectors = list(map(lambda x: x.replace(' ', '-'), videocard['PROCESS_power_pins'].split(', ')[0].split(' + ')))
             lst = {}
@@ -971,36 +994,21 @@ class Api:
             return {}
         return disc
 
-    # Функция, удаляющая из массива идентификаторов компонентов все, кроме идентификатора компонента с наименьшей ценой
-    def remove_dublicates_from_group(self, components: list, group: list):
-        prices = []
-        for index in group:
-            prices.append(components[index]['price'])
-        new_group = [prices.index(min(prices))]
-        return new_group
-
     # Функция, удаляющая дубликаты из массива компонентов
     def delete_dublicates(self, components: list, keys_to_remove: list):
-        uids = []
+        unique_components = []
         indexes = []
-        comp_list = components
-        for i in range(len(comp_list)):
-            arr = list(comp_list[i].keys())
-            for key in keys_to_remove:
-                if key in arr:
-                    arr.remove(key)
-            arr.sort()
-            uid = '|'.join(list(map(lambda x: str(comp_list[i].get(x)), arr)))
-            if uid not in uids:
-                uids.append(uid)
-                indexes.append([i])
-            else:
-                idx = uids.index(uid)
-                indexes[idx].append(i)
-        indexes = list(map(lambda x: self.remove_dublicates_from_group(comp_list, x) if len(x) > 1 else x, indexes))
-        new_components = merge_lists(indexes)
-        new_components.sort()
-        return list(map(lambda x: comp_list[x], new_components))
+        comp_list = copy.deepcopy(components)
+        for key in keys_to_remove:
+            for component in comp_list:
+                component.pop(key, None)
+        for index, component in enumerate(comp_list):
+            if component not in unique_components:
+                unique_components.append(component)
+                indexes.append(index)
+        comp_list = list(map(lambda index: components[index], indexes))
+        return comp_list
+            
 
     # Сбор и сохранение в БД информации о комплектующих одного типа
     def parse_components(self, component_type: str, component_path: str, qfilter: str, uid_ignored_fields: list):
@@ -1062,29 +1070,30 @@ class Api:
         components = self.delete_dublicates(components, uid_ignored_fields)
         print(Fore.MAGENTA + f'Removed {counter - len(components)} dublicates, totally parsed {len(components)} components.')
         print(Fore.MAGENTA + 'Saving components...')
-        for component in components:
-            if component_type == 'processor':
-                save_processor(component)
-            elif component_type == 'motherboard':
-                save_motherboard(component)
-            elif component_type == 'videocard':
-                save_videocard(component)
-            elif component_type == 'memory':
-                save_memory(component)
-            elif component_type == 'cooler':
-                save_cooler(component)
-            elif component_type == 'case':
-                save_case(component)
-            elif component_type == 'ssd':
-                save_ssd(component)
-            elif component_type == 'hdd':
-                save_hdd(component)
-            elif component_type == 'casecooler':
-                save_casecooler(component)
-            elif component_type == 'powersupply':
-                save_powersupply(component)
-            else:
-                raise ValueError('Wrong component type!')
+        with transaction.atomic():
+            for component in components:
+                if component_type == 'processor':
+                    save_processor(component)
+                elif component_type == 'motherboard':
+                    save_motherboard(component)
+                elif component_type == 'videocard':
+                    save_videocard(component)
+                elif component_type == 'memory':
+                    save_memory(component)
+                elif component_type == 'cooler':
+                    save_cooler(component)
+                elif component_type == 'case':
+                    save_case(component)
+                elif component_type == 'ssd':
+                    save_ssd(component)
+                elif component_type == 'hdd':
+                    save_hdd(component)
+                elif component_type == 'casecooler':
+                    save_casecooler(component)
+                elif component_type == 'powersupply':
+                    save_powersupply(component)
+                else:
+                    raise ValueError('Wrong component type!')
         print(Fore.MAGENTA + 'Components saved.')
 
 # Функция, возвращающая идентификатор производителя в БД по имени (если производитель не найден, то он создаётся).
@@ -1092,14 +1101,17 @@ def get_or_add_manufacturer(manufacturer: str):
         manufacturers = [name.upper() for name in Manufacturer.objects.values_list('name', flat=True)]
         uman = manufacturer.upper()
         if uman not in manufacturers:
-            man = Manufacturer.objects.create(name=uman, description="")
+            man = Manufacturer.objects.create(name=manufacturer, description="")
         else:
-            man = Manufacturer.objects.get(name = uman)
+            man = Manufacturer.objects.get(name__iexact = uman)
         return man
 
 # Сохранение данных о процессоре
 def save_processor(processor: dict):
     try:
+        generated_name = (processor['manufacturer'] + "_" + processor['series'] + "_" + processor['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/processor')):
+            urllib.request.urlretrieve(processor['image_url'], os.path.join('pc_configurator/media/components/processor', f'{generated_name}.webp'))
         comp = Processor(
             manufacturer = get_or_add_manufacturer(processor['manufacturer']),
             series = processor['series'],
@@ -1116,7 +1128,8 @@ def save_processor(processor: dict):
             tdp = processor['tdp'],
             price = processor['price'],
             link = processor['link'],
-            rating = processor['rate']
+            rating = processor['rate'],
+            image = os.path.join('components/processor', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1126,6 +1139,9 @@ def save_processor(processor: dict):
 # Сохранение данных о материнской плате
 def save_motherboard(motherboard: dict):
     try:
+        generated_name = (motherboard['manufacturer'] + "_" + motherboard['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/motherboard')):
+            urllib.request.urlretrieve(motherboard['image_url'], os.path.join('pc_configurator/media/components/motherboard', f'{generated_name}.webp'))
         comp = Motherboard(
             manufacturer = get_or_add_manufacturer(motherboard['manufacturer']),
             model = motherboard['model'],
@@ -1145,7 +1161,8 @@ def save_motherboard(motherboard: dict):
             m2_slots = motherboard['m2_slots'],
             backports = motherboard['backports'],
             price = motherboard['price'],
-            link = motherboard['link']
+            link = motherboard['link'],
+            image = os.path.join('components/motherboard', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1155,6 +1172,9 @@ def save_motherboard(motherboard: dict):
 # Сохранение данных о видеокарте
 def save_videocard(videocard: dict):
     try:
+        generated_name = (videocard['manufacturer'] + "_" + videocard['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/videocard')):
+            urllib.request.urlretrieve(videocard['image_url'], os.path.join('pc_configurator/media/components/videocard', f'{generated_name}.webp'))
         comp = Videocard(
             manufacturer = get_or_add_manufacturer(videocard['manufacturer']),
             model = videocard['model'],
@@ -1176,7 +1196,8 @@ def save_videocard(videocard: dict):
             length = videocard['length'],
             price = videocard['price'],
             link = videocard['link'],
-            rating = videocard['rate']
+            rating = videocard['rate'],
+            image = os.path.join('components/videocard', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1186,6 +1207,9 @@ def save_videocard(videocard: dict):
 # Сохранение данных о корпусе
 def save_case(case: dict):
     try:
+        generated_name = (case['manufacturer'] + "_" + case['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/case')):
+            urllib.request.urlretrieve(case['image_url'], os.path.join('pc_configurator/media/components/case', f'{generated_name}.webp'))
         comp = Case(
             manufacturer = get_or_add_manufacturer(case['manufacturer']),
             model = case['model'],
@@ -1207,7 +1231,8 @@ def save_case(case: dict):
             length = case['length'] if 'length' in list(case.keys()) else None,
             mass = case['mass'] if 'mass' in list(case.keys()) else None,
             price = case['price'],
-            link = case['link']
+            link = case['link'],
+            image = os.path.join('components/case', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1217,6 +1242,9 @@ def save_case(case: dict):
 # Сохранение данных об оперативной памяти
 def save_memory(memory: dict):
     try:
+        generated_name = (memory['manufacturer'] + "_" + memory['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/memory')):
+            urllib.request.urlretrieve(memory['image_url'], os.path.join('pc_configurator/media/components/memory', f'{generated_name}.webp'))
         comp = Memory(
             manufacturer = get_or_add_manufacturer(memory['manufacturer']),
             model = memory['model'],
@@ -1226,7 +1254,8 @@ def save_memory(memory: dict):
             bandwidth = memory['bandwidth'],
             latency = memory['latency'],
             price = memory['price'],
-            link = memory['link']
+            link = memory['link'],
+            image = os.path.join('components/memory', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1236,6 +1265,9 @@ def save_memory(memory: dict):
 # Сохранение данных о кулере
 def save_cooler(cooler: dict):
     try:
+        generated_name = (cooler['manufacturer'] + "_" + cooler['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/cooler')):
+            urllib.request.urlretrieve(cooler['image_url'], os.path.join('pc_configurator/media/components/cooler', f'{generated_name}.webp'))
         comp = Cooler(
             manufacturer = get_or_add_manufacturer(cooler['manufacturer']),
             model = cooler['model'],
@@ -1248,7 +1280,8 @@ def save_cooler(cooler: dict):
             radiator_size = None,
             noise_level = cooler['noise_level'],
             price = cooler['price'],
-            link = cooler['link']
+            link = cooler['link'],
+            image = os.path.join('components/cooler', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1258,6 +1291,9 @@ def save_cooler(cooler: dict):
 # Сохранение данных о твердотельном накопителе
 def save_ssd(ssd: dict):
     try:
+        generated_name = (ssd['manufacturer'] + "_" + ssd['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/disc')):
+            urllib.request.urlretrieve(ssd['image_url'], os.path.join('pc_configurator/media/components/disc', f'{generated_name}.webp'))
         comp = Disc(
             manufacturer = get_or_add_manufacturer(ssd['manufacturer']),
             model = ssd['model'],
@@ -1266,7 +1302,8 @@ def save_ssd(ssd: dict):
             rd_speed = ssd['rd_speed'],
             wr_speed = ssd['wr_speed'],
             price = ssd['price'],
-            link = ssd['link']
+            link = ssd['link'],
+            image = os.path.join('components/disc', f'{generated_name}.webp')
         )
         comp.save()
     except:
@@ -1276,6 +1313,9 @@ def save_ssd(ssd: dict):
 # Сохранение данных о жестком диске
 def save_hdd(hdd: dict):
     try:
+        generated_name = (hdd['manufacturer'] + "_" + hdd['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/disc')):
+            urllib.request.urlretrieve(hdd['image_url'], os.path.join('pc_configurator/media/components/disc', f'{generated_name}.webp'))
         comp = Disc(
             manufacturer = get_or_add_manufacturer(hdd['manufacturer']),
             model = hdd['model'],
@@ -1284,7 +1324,8 @@ def save_hdd(hdd: dict):
             rd_speed = None,
             wr_speed = None,
             price = hdd['price'],
-            link = hdd['link']
+            link = hdd['link'],
+            image = os.path.join('components/disc', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1294,6 +1335,9 @@ def save_hdd(hdd: dict):
 # Сохранение данных о корпусном вентиляторе
 def save_casecooler(casecooler: dict):
     try:
+        generated_name = (casecooler['manufacturer'] + "_" + casecooler['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/casecooler')):
+            urllib.request.urlretrieve(casecooler['image_url'], os.path.join('pc_configurator/media/components/casecooler', f'{generated_name}.webp'))
         comp = CaseCooler(
             manufacturer = get_or_add_manufacturer(casecooler['manufacturer']),
             model = casecooler['model'],
@@ -1303,7 +1347,8 @@ def save_casecooler(casecooler: dict):
             modular_joint = casecooler['modular_joint'],
             connector_pins = casecooler['connector_pins'],
             price = casecooler['price'],
-            link = casecooler['link']
+            link = casecooler['link'],
+            image = os.path.join('components/casecooler', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1313,6 +1358,9 @@ def save_casecooler(casecooler: dict):
 # Сохранение данных о блоке питания
 def save_powersupply(powersupply: dict):
     try:
+        generated_name = (powersupply['manufacturer'] + "_" + powersupply['model']).replace('%20', '_').replace(' ', '_').replace('/', '_')
+        while f'{generated_name}.webp' not in os.listdir(os.path.join('pc_configurator/media/components/powersupply')):
+            urllib.request.urlretrieve(powersupply['image_url'], os.path.join('pc_configurator/media/components/powersupply', f'{generated_name}.webp'))
         comp = PowerSupply(
             manufacturer = get_or_add_manufacturer(powersupply['manufacturer']),
             model = powersupply['model'],
@@ -1324,7 +1372,8 @@ def save_powersupply(powersupply: dict):
             modular_cables = powersupply['modular_cables'] if 'modular_cables' in list(powersupply.keys()) else False,
             length = powersupply['length'] if 'length' in list(powersupply.keys()) else None,
             price = powersupply['price'],
-            link = powersupply['link']
+            link = powersupply['link'],
+            image = os.path.join('components/powersupply', f'{generated_name}.webp')
         )
         comp.save()
     except KeyError:
@@ -1361,35 +1410,47 @@ def initial_data_insertion():
     if certificates > 0:
         print(Fore.YELLOW + 'Skipping certificates...')
     else:
+        while f'80_PLUS_Standard.svg' not in os.listdir(os.path.join('pc_configurator/media/certificates')):
+            urllib.request.urlretrieve('https://upload.wikimedia.org/wikipedia/commons/0/0d/80_Plus_Standard.svg', os.path.join('pc_configurator/media/certificates', f'80_PLUS_Standard.svg'))
+        while f'80_PLUS_Bronze.svg' not in os.listdir(os.path.join('pc_configurator/media/certificates')):
+            urllib.request.urlretrieve('https://upload.wikimedia.org/wikipedia/commons/6/64/80_Plus_Bronze.svg', os.path.join('pc_configurator/media/certificates', f'80_PLUS_Bronze.svg'))
+        while f'80_PLUS_Silver.svg' not in os.listdir(os.path.join('pc_configurator/media/certificates')):
+            urllib.request.urlretrieve('https://upload.wikimedia.org/wikipedia/commons/a/a9/80_Plus_Silver.svg', os.path.join('pc_configurator/media/certificates', f'80_PLUS_Silver.svg'))
+        while f'80_PLUS_Gold.svg' not in os.listdir(os.path.join('pc_configurator/media/certificates')):
+            urllib.request.urlretrieve('https://upload.wikimedia.org/wikipedia/commons/6/6c/80_Plus_Gold.svg', os.path.join('pc_configurator/media/certificates', f'80_PLUS_Gold.svg'))
+        while f'80_PLUS_Platinum.svg' not in os.listdir(os.path.join('pc_configurator/media/certificates')):
+            urllib.request.urlretrieve('https://upload.wikimedia.org/wikipedia/commons/e/ed/80_Plus_Platinum.svg', os.path.join('pc_configurator/media/certificates', f'80_PLUS_Platinum.svg'))
+        while f'80_PLUS_Titanium.svg' not in os.listdir(os.path.join('pc_configurator/media/certificates')):
+            urllib.request.urlretrieve('https://upload.wikimedia.org/wikipedia/commons/7/7f/80_Plus_Titanium.svg', os.path.join('pc_configurator/media/certificates', f'80_PLUS_Titanium.svg'))
         Certificate.objects.create(
             name = '80 PLUS Standard',
             power_ratio = 80,
-            icon = None
+            icon = os.path.join('certificates', '80_PLUS_Standard.svg')
         )
         Certificate.objects.create(
             name = '80 PLUS Bronze',
             power_ratio = 85,
-            icon = None
+            icon = os.path.join('certificates', '80_PLUS_Bronze.svg')
         )
         Certificate.objects.create(
             name = '80 PLUS Silver',
             power_ratio = 88,
-            icon = None
+            icon = os.path.join('certificates', '80_PLUS_Silver.svg')
         )
         Certificate.objects.create(
             name = '80 PLUS Gold',
             power_ratio = 91,
-            icon = None
+            icon = os.path.join('certificates', '80_PLUS_Gold.svg')
         )
         Certificate.objects.create(
             name = '80 PLUS Platinum',
             power_ratio = 93,
-            icon = None
+            icon = os.path.join('certificates', '80_PLUS_Platinum.svg')
         )
         Certificate.objects.create(
             name = '80 PLUS Titanium',
             power_ratio = 95,
-            icon = None
+            icon = os.path.join('certificates', '80_PLUS_Titanium.svg')
         )
     try:
         CaseCooler.objects.get(model='Предустановленный кулер')
@@ -1483,7 +1544,7 @@ class Command(BaseCommand):
             for component_type in component_types:
                 print(Fore.CYAN + f"Parsing {component_type}...")
                 if component_type == 'processor':
-                    interface.parse_components('processor', processor_path, processor_filter, ['link', 'price'])
+                    interface.parse_components('processor', processor_path, processor_filter, ['link', 'price', 'image_url'])
                 elif component_type == 'motherboard':
                     interface.parse_components('motherboard', motherboard_path, motherboard_filter, ['backports', 'internal_usb', 'connectors', 'link', 'price'])
                 elif component_type == 'videocard':

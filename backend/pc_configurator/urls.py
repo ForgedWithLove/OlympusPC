@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
     path('welcome/', views.welcome, name='welcome'),
+    path('components/processor/', views.select_processor, name='select_processor'),
     path('', views.configurator, name='configurator'),
 ]

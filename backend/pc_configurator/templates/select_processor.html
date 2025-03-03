@@ -1,0 +1,51 @@
+{% extends "base_component.html" %}
+
+{% block filters %}
+    <div class="comp_filter">
+        <div class="comp_filter_title">
+            Title
+        </div>
+        <div class="comp_filter_input">
+            Input
+        </div>
+    </div>
+{% endblock %}
+
+{% block components %}
+    {% for cpu in cpus %}
+        <div class="comp_body">
+            <div class="comp_title">
+                <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ cpu.manufacturer.name }} {{ cpu.series }} {{ cpu.model }} </div>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="comp_img">
+                    <img src="{{ cpu.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
+                </div>
+                <div class="comp_chars">
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Сокет: {{ cpu.socket }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во ядер: {{ cpu.cores }}</div>
+                    {% if cpu.e_cores > 0 %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Производительных ядер: {{ cpu.p_cores }}</div>
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Энергоэффективных ядер: {{ cpu.e_cores }}</div>
+                    {% endif %}
+                    {% load custom_filters %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во потоков: {{ cpu.threads }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тактовая частота: {{ cpu.frequency }} МГц</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Частота в Turbo-режиме: {{ cpu.turbo_freq }} МГц</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разблокированный множитель: {{ cpu.unlocked|bool_to_str }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Интегрированное графическое ядро: {{ cpu.int_graphics|bool_to_str }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тепловыделение: {{ cpu.tdp }} Вт</div>
+                    <div style='padding: 5px;  font-size: 12pt;'>Рейтинг производительности: {{ cpu.rating }}</div>
+                </div>
+                <div class="comp_add">
+                    <div class="comp_price">
+                        {{ cpu.price }} ₽
+                    </div>
+                    <div class="comp_add_button_space">
+                        <button title="Добавить компонент в сборку">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

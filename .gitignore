@@ -1,1 +1,4 @@
 .env
+backend/pc_configurator/media/apps/*
+backend/pc_configurator/media/certificates/*
+backend/pc_configurator/media/components/**/*.webp
