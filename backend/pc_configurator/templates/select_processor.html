@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block components %}
-    {% for cpu in cpus %}
+    {% for cpu in page.object_list %}
         <div class="comp_body">
             <div class="comp_title">
                 <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ cpu.manufacturer.name }} {{ cpu.series }} {{ cpu.model }} </div>
@@ -46,6 +46,6 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>     
     {% endfor %}
 {% endblock %}

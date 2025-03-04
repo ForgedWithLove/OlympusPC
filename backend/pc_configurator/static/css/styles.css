@@ -170,6 +170,8 @@
     flex-direction: column;
     background-color: rgb(187, 255, 0);
     width: calc(100% - 400px);
+    justify-content: center;
+    align-items: center;
 }
 
 .comp_filter{
@@ -194,7 +196,8 @@
     justify-content: space-evenly;
     padding: 10px;
     margin: 10px;
-    min-width: 400px;
+    min-width: 90%;
+    max-width: calc(100% - 20px);
     background-color: aliceblue;
 }
 
@@ -243,4 +246,38 @@
     justify-content: flex-start;
     background-color: rgb(189, 138, 45);
     padding: 5px;
+}
+
+.paginator_button {
+    background-color: #f44336;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    height: 30px;
+    width: 30px;
+    border-radius: 1px;
+}
+.paginator_button:hover {
+    background-color: #aa3a31;
+    text-decoration: none;
+    color: white;
+}
+
+.paginator_button_selected {
+    background-color: #aa3a31;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    height: 30px;
+    width: 30px;
+    border-radius: 1px;
+}
+.paginator_button_selected:hover {
+    background-color: #aa3a31;
+    text-decoration: none;
+    color: white;
 }
