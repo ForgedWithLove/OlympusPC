@@ -9,12 +9,12 @@
             {% block components %}{% endblock %}
             <div class="pagination">
                 {% if page.has_previous %}
-                    <a href="?page=1" class="paginator_button">1</a>
+                    <a href="?{{ params }}&page=1" class="paginator_button">1</a>
                     {% if page.number > 2 %}
                         {% if page.previous_page_number > 2 %}
-                            <a href="?page={{ page.previous_page_number|add:"-1" }}" class="paginator_button">...</a> 
+                            <a href="?{{ params }}&page={{ page.previous_page_number|add:"-1" }}" class="paginator_button">...</a> 
                         {% endif %}
-                        <a href="?page={{ page.previous_page_number }}" class="paginator_button">{{ page.previous_page_number }}</a> 
+                        <a href="?{{ params }}&page={{ page.previous_page_number }}" class="paginator_button">{{ page.previous_page_number }}</a> 
                     {% endif %}
                 {% endif %}
         
@@ -24,12 +24,12 @@
         
                 {% if page.has_next %}
                     {% if page.number < page.paginator.num_pages|add:"-1" %}
-                        <a href="?page={{ page.next_page_number }}" class="paginator_button">{{ page.next_page_number }}</a>
+                        <a href="?{{ params }}&page={{ page.next_page_number }}" class="paginator_button">{{ page.next_page_number }}</a>
                         {% if page.next_page_number < page.paginator.num_pages|add:"-1" %}
-                            <a href="?page={{ page.next_page_number|add:"1" }}" class="paginator_button">...</a>
+                            <a href="?{{ params }}&page={{ page.next_page_number|add:"1" }}" class="paginator_button">...</a>
                         {% endif %}
                     {% endif %}
-                    <a href="?page={{ page.paginator.num_pages }}" class="paginator_button">{{ page.paginator.num_pages }}</a>
+                    <a href="?{{ params }}&page={{ page.paginator.num_pages }}" class="paginator_button">{{ page.paginator.num_pages }}</a>
                 {% endif %}
             </div>   
         </div>

@@ -1,14 +1,26 @@
 {% extends "base_component.html" %}
 
 {% block filters %}
-    <div class="comp_filter">
-        <div class="comp_filter_title">
-            Title
+    <form method="GET" action="{% url 'select_processor' %}">
+        {% csrf_token %}
+        <input type="hidden" name="prev_params" value="{{ params }}">
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Сокет
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    {% for socket in sockets %}
+                        <input type="checkbox" id="{{socket}}" name="socket" value="{{socket}}">
+                        <label for="{{socket}}">{{socket}}</label><br>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-        <div class="comp_filter_input">
-            Input
-        </div>
-    </div>
+        <input type="submit" value="Применить">
+        <a href="{% url 'select_processor' %}">Сбросить фильтры</a>
+        
+    </form>
 {% endblock %}
 
 {% block components %}
