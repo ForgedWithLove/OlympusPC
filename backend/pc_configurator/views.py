@@ -99,3 +99,49 @@ def select_motherboard(request):
         "params": params.urlencode()
     }
     return render(request, 'select_motherboard.html', context)
+
+def select_videocard(request):
+    #Копируем текущие параметры запроса
+    params = request.GET.copy()
+    #Удаляем параметры, которые не нужно запоминать
+    if 'csrfmiddlewaretoken' in params:
+        params.pop('csrfmiddlewaretoken')
+    if 'prev_params' in params:
+        params.pop('prev_params')
+    if 'page' in params:
+        params.pop('page')
+    #Собираем со страницы предыдущие параметры запроса
+    prev_params = QueryDict(request.GET.get('prev_params', ''))
+    #Собираем фильтры по параметрам
+    sorting = params.get('sort', '')
+    chip_filter = params.getlist('chip', '')
+    #Определяем порядок вывода компонентов
+    if sorting == 'price_asc':
+        order_by_field = 'price'
+    elif sorting == 'price_desc':
+        order_by_field = '-price'
+    elif sorting == 'performance_asc':
+        order_by_field = 'rating'
+    elif sorting == 'performance_desc':
+        order_by_field = '-rating'
+    else:
+        order_by_field = 'id'
+    #Собираем компоненты для формирования данных в шаблон
+    components = Videocard.objects.all().order_by(order_by_field)
+    #Формируем данные для вывода в шаблон
+    chips = components.order_by('chip').values_list('chip', flat=True).distinct()
+    #Применяем фильтры к компонентам
+    query = Q()
+    for chip in chip_filter:
+        query = query | Q(chip=chip)
+    components = components.filter(query)
+    #Разбиваем данные по страницам
+    paginator = Paginator(components, 32)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    context = {
+        "page": page,
+        "chips": chips,
+        "params": params.urlencode()
+    }
+    return render(request, 'select_videocard.html', context)
