@@ -7,6 +7,25 @@
         <div class="comp_filter">
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Сортировка
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    <input type="radio" id="sort_default" name="sort" value="default" checked="true">
+                    <label for="sort_default">По умолчанию</label><br>
+                    <input type="radio" id="sort_price_asc" name="sort" value="price_asc">
+                    <label for="sort_price_asc">По цене ↑</label><br>
+                    <input type="radio" id="sort_price_desc" name="sort" value="price_desc">
+                    <label for="sort_price_desc">По цене ↓</label><br>
+                    <input type="radio" id="sort_performance_asc" name="sort" value="performance_asc">
+                    <label for="sort_performance_asc">По производительности ↑</label><br>
+                    <input type="radio" id="sort_performance_desc" name="sort" value="performance_desc">
+                    <label for="sort_performance_desc">По производительности ↓</label><br>
+                </ul>
+            </div>
+        </div>
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                     Сокет
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
