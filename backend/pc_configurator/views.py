@@ -145,3 +145,87 @@ def select_videocard(request):
         "params": params.urlencode()
     }
     return render(request, 'select_videocard.html', context)
+
+def select_memory(request):
+    #Копируем текущие параметры запроса
+    params = request.GET.copy()
+    #Удаляем параметры, которые не нужно запоминать
+    if 'csrfmiddlewaretoken' in params:
+        params.pop('csrfmiddlewaretoken')
+    if 'prev_params' in params:
+        params.pop('prev_params')
+    if 'page' in params:
+        params.pop('page')
+    #Собираем со страницы предыдущие параметры запроса
+    prev_params = QueryDict(request.GET.get('prev_params', ''))
+    #Собираем фильтры по параметрам
+    sorting = params.get('sort', '')
+    type_filter = params.getlist('mem_type', '')
+    #Определяем порядок вывода компонентов
+    if sorting == 'price_asc':
+        order_by_field = 'price'
+    elif sorting == 'price_desc':
+        order_by_field = '-price'
+    else:
+        order_by_field = 'id'
+    #Собираем компоненты для формирования данных в шаблон
+    components = Memory.objects.all().order_by(order_by_field)
+    #Формируем данные для вывода в шаблон
+    types = components.order_by('mem_type').values_list('mem_type', flat=True).distinct()
+    #Применяем фильтры к компонентам
+    query = Q()
+    for mem_type in type_filter:
+        query = query | Q(mem_type=mem_type)
+    components = components.filter(query)
+    #Разбиваем данные по страницам
+    paginator = Paginator(components, 32)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    context = {
+        "page": page,
+        "types": types,
+        "params": params.urlencode()
+    }
+    return render(request, 'select_memory.html', context)
+
+def select_cooler(request):
+    #Копируем текущие параметры запроса
+    params = request.GET.copy()
+    #Удаляем параметры, которые не нужно запоминать
+    if 'csrfmiddlewaretoken' in params:
+        params.pop('csrfmiddlewaretoken')
+    if 'prev_params' in params:
+        params.pop('prev_params')
+    if 'page' in params:
+        params.pop('page')
+    #Собираем со страницы предыдущие параметры запроса
+    prev_params = QueryDict(request.GET.get('prev_params', ''))
+    #Собираем фильтры по параметрам
+    sorting = params.get('sort', '')
+    coolant_filter = params.getlist('coolant', '')
+    #Определяем порядок вывода компонентов
+    if sorting == 'price_asc':
+        order_by_field = 'price'
+    elif sorting == 'price_desc':
+        order_by_field = '-price'
+    else:
+        order_by_field = 'id'
+    #Собираем компоненты для формирования данных в шаблон
+    components = Cooler.objects.all().order_by(order_by_field)
+    #Формируем данные для вывода в шаблон
+    coolants = components.order_by('coolant').values_list('coolant', flat=True).distinct()
+    #Применяем фильтры к компонентам
+    query = Q()
+    for coolant in coolant_filter:
+        query = query | Q(coolant=coolant)
+    components = components.filter(query)
+    #Разбиваем данные по страницам
+    paginator = Paginator(components, 32)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    context = {
+        "page": page,
+        "coolants": coolants,
+        "params": params.urlencode()
+    }
+    return render(request, 'select_cooler.html', context)
