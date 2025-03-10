@@ -21,13 +21,13 @@ def get_json_keys(json_str):
     return json.loads(json_str).keys()
 
 @register.filter
-def array_output(array):
+def array_output(array, output_len):
     string = ''
-    length = 32
+    length = output_len
     for index, value in enumerate(array):
         if length - len(value) < 0:
             string += f'\n{value}, ' if index != len(array) - 1 else f'\n{value}'
-            length = 32 - len(value)
+            length = output_len - len(value)
         else:
             string += f'{value}, ' if index != len(array) - 1 else f'{value}'
             length -= len(value)

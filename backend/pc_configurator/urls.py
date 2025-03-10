@@ -9,5 +9,7 @@ urlpatterns = [
     path('components/videocard/', views.select_videocard, name='select_videocard'),
     path('components/memory/', views.select_memory, name='select_memory'),
     path('components/cooler/', views.select_cooler, name='select_cooler'),
+    path('components/case/', views.select_case, name='select_case'),
+    path('components/disc/', views.select_disc, name='select_disc'),
     path('', views.configurator, name='configurator'),
 ]

@@ -1,0 +1,104 @@
+{% extends "base_component.html" %}
+
+{% block filters %}
+    <form method="GET" action="{% url 'select_case' %}">
+        {% csrf_token %}
+        <input type="hidden" name="prev_params" value="{{ params }}">
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Сортировка
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    <input type="radio" id="sort_default" name="sort" value="default" checked="true">
+                    <label for="sort_default">По умолчанию</label><br>
+                    <input type="radio" id="sort_price_asc" name="sort" value="price_asc">
+                    <label for="sort_price_asc">По цене ↑</label><br>
+                    <input type="radio" id="sort_price_desc" name="sort" value="price_desc">
+                    <label for="sort_price_desc">По цене ↓</label><br>
+                </ul>
+            </div>
+        </div>
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Типоразмер
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    {% for typesize in typesizes %}
+                        <input type="checkbox" id="{{typesize}}" name="typesize" value="{{typesize}}">
+                        <label for="{{typesize}}">{{typesize}}</label><br>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <input type="submit" value="Применить">
+        <a href="{% url 'select_case' %}">Сбросить фильтры</a>
+        
+    </form>
+{% endblock %}
+
+{% block components %}
+    {% for case in page.object_list %}
+        <div class="comp_body">
+            <div class="comp_title">
+                <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ case.manufacturer.name }} {{ case.model }} </div>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="comp_img">
+                    <img src="{{ case.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
+                </div>
+                <div class="comp_chars">
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Типоразмер: {{ case.typesize }}</div>
+                    {% load custom_filters %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Форм-фактор мат.платы: {{ case.mb_ffs|array_output:32 }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Формат блока питания: {{ case.psu_typesize|array_output:32 }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов 3.5': {{ case.big_sata_slots }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов 2.5': {{ case.small_sata_slots }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Максимальная длина видеокрты: {{ case.max_gpu_length }} мм</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Максимальная высота кулера: {{ case.max_cooler_height }} мм</div>
+                    {% if case.max_psu_length %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Максимальная длина блока питания: {{ case.max_psu_length }} мм</div>
+                    {% endif %}    
+                    {% if case.front_interfaces %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разъёмы передней панели:</div>
+                        {% for key in case.front_interfaces|get_json_keys %}
+                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ case.front_interfaces|get_json_value:key }}</div>
+                        {% endfor %}
+                    {% endif %}  
+                    {% if case.cooler_slots %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Места для вентиляторов:</div>
+                        {% for key in case.cooler_slots|get_json_keys %}
+                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ case.cooler_slots|get_json_value:key }}</div>
+                        {% endfor %}
+                    {% endif %}  
+                    {% if case.installed_coolers %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Установленные вентиляторы:</div>
+                        {% for key in case.installed_coolers|get_json_keys %}
+                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ case.installed_coolers|get_json_value:key }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов расширения: {{ case.exp_slots }}</div>
+                    {% if case.width %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Габариты:</div>
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Ширина: {{ case.width }} мм</div>
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Высота: {{ case.height }} мм</div>
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Глубина: {{ case.length }} мм</div>
+                    {% endif %}    
+                    {% if case.mass %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Масса: {{ case.mass }} кг</div>
+                    {% endif %}    
+                    <div style='padding: 5px; font-size: 12pt;'>Возможность установки СЖО: {{ case.liquid_possible|bool_to_str }}</div>
+                </div>
+                <div class="comp_add">
+                    <div class="comp_price">
+                        {{ case.price }} ₽
+                    </div>
+                    <div class="comp_add_button_space">
+                        <button title="Добавить компонент в сборку">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>     
+    {% endfor %}
+{% endblock %}
