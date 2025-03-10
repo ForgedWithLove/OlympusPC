@@ -39,7 +39,7 @@ def select_processor(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Processor.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Processor.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     sockets = components.order_by('socket').values_list('socket', flat=True).distinct()
     #Применяем фильтры к компонентам
@@ -81,7 +81,7 @@ def select_motherboard(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Motherboard.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Motherboard.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     sockets = components.order_by('socket').values_list('socket', flat=True).distinct()
     #Применяем фильтры к компонентам
@@ -127,7 +127,7 @@ def select_videocard(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Videocard.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Videocard.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     chips = components.order_by('chip').values_list('chip', flat=True).distinct()
     #Применяем фильтры к компонентам
@@ -169,7 +169,7 @@ def select_memory(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Memory.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Memory.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     types = components.order_by('mem_type').values_list('mem_type', flat=True).distinct()
     #Применяем фильтры к компонентам
@@ -211,7 +211,7 @@ def select_cooler(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Cooler.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Cooler.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     coolants = components.order_by('coolant').values_list('coolant', flat=True).distinct()
     #Применяем фильтры к компонентам
@@ -253,7 +253,7 @@ def select_case(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Case.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Case.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     typesizes = components.order_by('typesize').values_list('typesize', flat=True).distinct()
     #Применяем фильтры к компонентам
@@ -295,7 +295,7 @@ def select_disc(request):
     else:
         order_by_field = 'id'
     #Собираем компоненты для формирования данных в шаблон
-    components = Disc.objects.all().select_related('manufacturer').order_by(order_by_field)
+    components = Disc.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
     #Формируем данные для вывода в шаблон
     types = components.select_related('type').order_by('type_id').distinct('type_id')
     #Применяем фильтры к компонентам
@@ -313,3 +313,87 @@ def select_disc(request):
         "params": params.urlencode()
     }
     return render(request, 'select_disc.html', context)
+
+def select_casecooler(request):
+    #Копируем текущие параметры запроса
+    params = request.GET.copy()
+    #Удаляем параметры, которые не нужно запоминать
+    if 'csrfmiddlewaretoken' in params:
+        params.pop('csrfmiddlewaretoken')
+    if 'prev_params' in params:
+        params.pop('prev_params')
+    if 'page' in params:
+        params.pop('page')
+    #Собираем со страницы предыдущие параметры запроса
+    prev_params = QueryDict(request.GET.get('prev_params', ''))
+    #Собираем фильтры по параметрам
+    sorting = params.get('sort', '')
+    size_filter = params.getlist('size', '')
+    #Определяем порядок вывода компонентов
+    if sorting == 'price_asc':
+        order_by_field = 'price'
+    elif sorting == 'price_desc':
+        order_by_field = '-price'
+    else:
+        order_by_field = 'id'
+    #Собираем компоненты для формирования данных в шаблон
+    components = CaseCooler.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
+    #Формируем данные для вывода в шаблон
+    sizes = components.order_by('size').values_list('size', flat=True).distinct()
+    #Применяем фильтры к компонентам
+    query = Q()
+    for size in size_filter:
+        query = query | Q(size=size)
+    components = components.filter(query)
+    #Разбиваем данные по страницам
+    paginator = Paginator(components, 32)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    context = {
+        "page": page,
+        "sizes": sizes,
+        "params": params.urlencode()
+    }
+    return render(request, 'select_casecooler.html', context)
+
+def select_powersupply(request):
+    #Копируем текущие параметры запроса
+    params = request.GET.copy()
+    #Удаляем параметры, которые не нужно запоминать
+    if 'csrfmiddlewaretoken' in params:
+        params.pop('csrfmiddlewaretoken')
+    if 'prev_params' in params:
+        params.pop('prev_params')
+    if 'page' in params:
+        params.pop('page')
+    #Собираем со страницы предыдущие параметры запроса
+    prev_params = QueryDict(request.GET.get('prev_params', ''))
+    #Собираем фильтры по параметрам
+    sorting = params.get('sort', '')
+    typesize_filter = params.getlist('typesize', '')
+    #Определяем порядок вывода компонентов
+    if sorting == 'price_asc':
+        order_by_field = 'price'
+    elif sorting == 'price_desc':
+        order_by_field = '-price'
+    else:
+        order_by_field = 'id'
+    #Собираем компоненты для формирования данных в шаблон
+    components = PowerSupply.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
+    #Формируем данные для вывода в шаблон
+    typesizes = components.order_by('typesize').values_list('typesize', flat=True).distinct()
+    #Применяем фильтры к компонентам
+    query = Q()
+    for typesize in typesize_filter:
+        query = query | Q(typesize=typesize)
+    components = components.filter(query)
+    #Разбиваем данные по страницам
+    paginator = Paginator(components, 32)
+    page_number = request.GET.get("page")
+    page = paginator.get_page(page_number)
+    context = {
+        "page": page,
+        "typesizes": typesizes,
+        "params": params.urlencode()
+    }
+    return render(request, 'select_powersupply.html', context)

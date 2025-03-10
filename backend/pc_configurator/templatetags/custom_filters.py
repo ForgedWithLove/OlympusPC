@@ -42,5 +42,12 @@ def coolant_output(coolant):
         return 'Жидкостный'
     else:
         return coolant
+
+@register.filter
+def pfc_output(pfc):
+    if pfc:
+        return 'Активный'
+    else:
+        return 'Пассивный'
     
 

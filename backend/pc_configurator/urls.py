@@ -11,5 +11,7 @@ urlpatterns = [
     path('components/cooler/', views.select_cooler, name='select_cooler'),
     path('components/case/', views.select_case, name='select_case'),
     path('components/disc/', views.select_disc, name='select_disc'),
+    path('components/casecooler/', views.select_casecooler, name='select_casecooler'),
+    path('components/powersupply/', views.select_powersupply, name='select_powersupply'),
     path('', views.configurator, name='configurator'),
 ]

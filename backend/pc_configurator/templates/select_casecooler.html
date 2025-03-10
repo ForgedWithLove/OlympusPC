@@ -1,0 +1,86 @@
+{% extends "base_component.html" %}
+
+{% block filters %}
+    <form method="GET" action="{% url 'select_casecooler' %}">
+        {% csrf_token %}
+        <input type="hidden" name="prev_params" value="{{ params }}">
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Сортировка
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    <input type="radio" id="sort_default" name="sort" value="default" checked="true">
+                    <label for="sort_default">По умолчанию</label><br>
+                    <input type="radio" id="sort_price_asc" name="sort" value="price_asc">
+                    <label for="sort_price_asc">По цене ↑</label><br>
+                    <input type="radio" id="sort_price_desc" name="sort" value="price_desc">
+                    <label for="sort_price_desc">По цене ↓</label><br>
+                </ul>
+            </div>
+        </div>
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Размер
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    {% for size in sizes %}
+                        <input type="checkbox" id="{{size}}" name="size" value="{{size}}">
+                        <label for="{{size}}">{{size}}</label><br>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <input type="submit" value="Применить">
+        <a href="{% url 'select_casecooler' %}">Сбросить фильтры</a>
+        
+    </form>
+{% endblock %}
+
+{% block components %}
+    {% for casecooler in page.object_list %}
+        <div class="comp_body">
+            <div class="comp_title">
+                <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ casecooler.manufacturer.name }} {{ casecooler.model }} </div>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="comp_img">
+                    <img src="{{ casecooler.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
+                </div>
+                <div class="comp_chars">
+                    {% if casecooler.size %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Размер: {{ casecooler.size }} мм</div>
+                    {% endif %}
+                    {% if casecooler.airflow %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Воздушный поток: {{ casecooler.airflow }} CFM</div>
+                    {% endif %}
+                    {% if casecooler.noise_level %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Уровень шума: {{ casecooler.noise_level }} дБ</div>
+                    {% endif %}  
+                    {% load custom_filters %}
+                    {% if casecooler.modular_joint %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Модульное соединение: {{ casecooler.modular_joint|bool_to_str }}</div>
+                    {% endif %}  
+                    {% if casecooler.connector_pins %}
+                        {% if casecooler.connector_pins == '3-pin argb-5v' %}
+                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннектор: ARGB 5V (3-pin)</div>
+                        {% elif casecooler.connector_pins == '4-pin pwm' %}
+                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннектор: PWM (4-pin)</div>
+                        {% else %}
+                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннектор: {{ casecooler.connector_pins }}</div>
+                        {% endif %}  
+                    {% endif %}  
+                </div>
+                <div class="comp_add">
+                    <div class="comp_price">
+                        {{ casecooler.price }} ₽
+                    </div>
+                    <div class="comp_add_button_space">
+                        <button title="Добавить компонент в сборку">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>     
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base_component.html" %}
+
+{% block filters %}
+    <form method="GET" action="{% url 'select_powersupply' %}">
+        {% csrf_token %}
+        <input type="hidden" name="prev_params" value="{{ params }}">
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Сортировка
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    <input type="radio" id="sort_default" name="sort" value="default" checked="true">
+                    <label for="sort_default">По умолчанию</label><br>
+                    <input type="radio" id="sort_price_asc" name="sort" value="price_asc">
+                    <label for="sort_price_asc">По цене ↑</label><br>
+                    <input type="radio" id="sort_price_desc" name="sort" value="price_desc">
+                    <label for="sort_price_desc">По цене ↓</label><br>
+                </ul>
+            </div>
+        </div>
+        <div class="comp_filter">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Формат
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+                    {% for typesize in typesizes %}
+                        <input type="checkbox" id="{{typesize}}" name="typesize" value="{{typesize}}">
+                        <label for="{{typesize}}">{{typesize}}</label><br>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <input type="submit" value="Применить">
+        <a href="{% url 'select_powersupply' %}">Сбросить фильтры</a>
+        
+    </form>
+{% endblock %}
+
+{% block components %}
+    {% for powersupply in page.object_list %}
+        <div class="comp_body">
+            <div class="comp_title">
+                <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ powersupply.manufacturer.name }} {{ powersupply.model }} </div>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="comp_img">
+                    <img src="{{ powersupply.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
+                </div>
+                <div class="comp_chars">
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Формат: {{ powersupply.typesize }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Мощность: {{ powersupply.power }} Вт</div>
+                    {% if powersupply.certificate %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Сертификат: {{ powersupply.certificate.name }}</div>
+                    {% endif %}
+                    {% load custom_filters %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>PFC: {{ powersupply.pfc_act|pfc_output }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Отсоединяемые кабели: {{ powersupply.modular_cables|bool_to_str }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннекторы:</div>
+                    {% for key in powersupply.connectors|get_json_keys %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ powersupply.connectors|get_json_value:key }}</div>
+                    {% endfor %}
+                    {% if powersupply.length %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Длина: {{ powersupply.length }}</div>
+                    {% endif %}
+                </div>
+                <div class="comp_add">
+                    <div class="comp_price">
+                        {{ powersupply.price }} ₽
+                    </div>
+                    <div class="comp_add_button_space">
+                        <button title="Добавить компонент в сборку">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>     
+    {% endfor %}
+{% endblock %}
