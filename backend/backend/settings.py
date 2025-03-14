@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pc_configurator',
+    'crispy_forms',
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -126,12 +128,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
@@ -151,3 +153,7 @@ CELERY_RESULT_BACKEND = os.environ.get("RESULT_BACKEND", "redis://localhost:6379
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'pc_configurator/media')
 MEDIA_URL = '/pc_configurator/media/'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"

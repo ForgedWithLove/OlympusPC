@@ -18,4 +18,6 @@ requests
 
 colorama
 
-undetected-chromedriver
+django-crispy-forms
+
+crispy-bootstrap5

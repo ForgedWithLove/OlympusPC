@@ -13,5 +13,8 @@ urlpatterns = [
     path('components/disc/', views.select_disc, name='select_disc'),
     path('components/casecooler/', views.select_casecooler, name='select_casecooler'),
     path('components/powersupply/', views.select_powersupply, name='select_powersupply'),
-    path('', views.configurator, name='configurator'),
+    path("register/", views.register_request, name="register"),
+    path("login/", views.login_request, name="login"),
+    path("logout/", views.logout_request, name="logout"),
+    path('assemble/', views.assemble, name='assemble'),
 ]

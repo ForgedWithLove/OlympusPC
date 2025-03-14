@@ -1,16 +1,20 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from pc_configurator.models import Manufacturer, Processor, Motherboard, Videocard, Memory, Cooler, Case, Disc, CaseCooler, PowerSupply, DiscType, Certificate
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import QueryDict
+from .forms import NewUserForm
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
 
 def welcome(request):
     return render(
         request,
         'welcome.html')
 
-def configurator(request):
-    return render(request, 'configurator.html')
+def assemble(request):
+    return render(request, 'assemble.html')
 
 def select_processor(request):
     #Копируем текущие параметры запроса
@@ -357,43 +361,75 @@ def select_casecooler(request):
     return render(request, 'select_casecooler.html', context)
 
 def select_powersupply(request):
-    #Копируем текущие параметры запроса
-    params = request.GET.copy()
-    #Удаляем параметры, которые не нужно запоминать
-    if 'csrfmiddlewaretoken' in params:
-        params.pop('csrfmiddlewaretoken')
-    if 'prev_params' in params:
-        params.pop('prev_params')
-    if 'page' in params:
-        params.pop('page')
-    #Собираем со страницы предыдущие параметры запроса
-    prev_params = QueryDict(request.GET.get('prev_params', ''))
-    #Собираем фильтры по параметрам
-    sorting = params.get('sort', '')
-    typesize_filter = params.getlist('typesize', '')
-    #Определяем порядок вывода компонентов
-    if sorting == 'price_asc':
-        order_by_field = 'price'
-    elif sorting == 'price_desc':
-        order_by_field = '-price'
+    if request.method == 'POST':
+        print(request.POST.get('id'))
     else:
-        order_by_field = 'id'
-    #Собираем компоненты для формирования данных в шаблон
-    components = PowerSupply.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
-    #Формируем данные для вывода в шаблон
-    typesizes = components.order_by('typesize').values_list('typesize', flat=True).distinct()
-    #Применяем фильтры к компонентам
-    query = Q()
-    for typesize in typesize_filter:
-        query = query | Q(typesize=typesize)
-    components = components.filter(query)
-    #Разбиваем данные по страницам
-    paginator = Paginator(components, 32)
-    page_number = request.GET.get("page")
-    page = paginator.get_page(page_number)
-    context = {
-        "page": page,
-        "typesizes": typesizes,
-        "params": params.urlencode()
-    }
-    return render(request, 'select_powersupply.html', context)
+        #Копируем текущие параметры запроса
+        params = request.GET.copy()
+        #Удаляем параметры, которые не нужно запоминать
+        if 'csrfmiddlewaretoken' in params:
+            params.pop('csrfmiddlewaretoken')
+        if 'prev_params' in params:
+            params.pop('prev_params')
+        if 'page' in params:
+            params.pop('page')
+        #Собираем со страницы предыдущие параметры запроса
+        prev_params = QueryDict(request.GET.get('prev_params', ''))
+        #Собираем фильтры по параметрам
+        sorting = params.get('sort', '')
+        typesize_filter = params.getlist('typesize', '')
+        #Определяем порядок вывода компонентов
+        if sorting == 'price_asc':
+            order_by_field = 'price'
+        elif sorting == 'price_desc':
+            order_by_field = '-price'
+        else:
+            order_by_field = 'id'
+        #Собираем компоненты для формирования данных в шаблон
+        components = PowerSupply.objects.filter(price__gt=0).select_related('manufacturer').order_by(order_by_field)
+        #Формируем данные для вывода в шаблон
+        typesizes = components.order_by('typesize').values_list('typesize', flat=True).distinct()
+        #Применяем фильтры к компонентам
+        query = Q()
+        for typesize in typesize_filter:
+            query = query | Q(typesize=typesize)
+        components = components.filter(query)
+        #Разбиваем данные по страницам
+        paginator = Paginator(components, 32)
+        page_number = request.GET.get("page")
+        page = paginator.get_page(page_number)
+        context = {
+            "page": page,
+            "typesizes": typesizes,
+            "params": params.urlencode()
+        }
+        return render(request, 'select_powersupply.html', context)
+
+def register_request(request):
+    if request.method == "POST":
+        form = NewUserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Регистрация успешна!')
+            return redirect("assemble")
+        messages.error(request, "Введена некорректная информация.")
+    form = NewUserForm()
+    return render (request=request, template_name="register.html", context={"register_form":form})
+
+def login_request(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = authenticate(username=request.POST['username'], password=request.POST['password'])
+            if user:
+                login(request, user)
+                return redirect("assemble")
+            else:
+                messages.error(request, "Неверный логин или пароль.")
+    form = AuthenticationForm()
+    return render (request=request, template_name="login.html", context={"login_form":form})
+
+def logout_request(request):
+    logout(request)
+    return redirect('welcome')

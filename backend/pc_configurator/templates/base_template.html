@@ -20,6 +20,7 @@
            url('{% static 'fonts/FuturaBookNormalRegular.ttf' %}') format('truetype');
     }
   </style>
+  {% block head_extension %}{% endblock %}
 </head>
 
 <body>
@@ -31,6 +32,25 @@
           {% load static %}
           <img src="{% static 'images/logo.png' %}" alt="logo" id="navbar_logo" >
         </div>
+        {% if '/login' not in request.path and '/register' not in request.path %}
+          {% if '/welcome' not in request.path %}
+            <div class="navigation_button">
+                <a href="{% url 'welcome' %}">Главная</a>
+            </div>
+          {% endif %}
+          {% if '/assemble' not in request.path %}
+            <div class="navigation_button">
+                <a href="{% url 'assemble' %}">Конфигуратор</a>
+            </div>
+          {% endif %}
+          <div id="log_button">
+            {% if user.is_authenticated %}
+              <a href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+              <a href="{% url 'login' %}">Войти</a>
+            {% endif %}
+          </div>
+        {% endif %}
       </div>
       {% block content %}{% endblock %}
     </div>

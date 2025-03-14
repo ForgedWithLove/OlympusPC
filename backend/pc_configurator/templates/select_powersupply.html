@@ -70,7 +70,11 @@
                         {{ powersupply.price }} ₽
                     </div>
                     <div class="comp_add_button_space">
-                        <button title="Добавить компонент в сборку">Добавить</button>
+                        <form method="POST" action="{% url 'select_powersupply' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ powersupply.id }}">
+                            <button title="Добавить компонент в сборку">Добавить</button>
+                        </form>
                     </div>
                 </div>
             </div>
