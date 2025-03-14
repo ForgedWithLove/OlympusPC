@@ -315,3 +315,13 @@
 #log_button {
     margin: 10px;
 }
+
+#guest_user_bar {
+    width: 100%;
+    background-color: gold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    font-size: 14pt;
+}

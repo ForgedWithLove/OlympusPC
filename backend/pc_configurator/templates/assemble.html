@@ -1,6 +1,12 @@
 {% extends "base_template.html" %}
 
 {% block content %}
+{% load guest_user %}
+{% if user|is_guest_user %}
+    <div id='guest_user_bar'>
+        Вы вошли как гость. Для сохранения сборки необходимо<span>&nbsp;</span><a href="{% url "guest_to_user" %}"> зарегистрироваться</a>.
+    </div>
+{% endif %}
 <div id="configurator_content">
     <div id="configurator_components_panel">
      

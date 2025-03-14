@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pc_configurator',
     'crispy_forms',
-    "crispy_bootstrap5",
+    'crispy_bootstrap5',
+    'guest_user',
 ]
 
 MIDDLEWARE = [
@@ -157,3 +158,13 @@ MEDIA_URL = '/pc_configurator/media/'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+AUTHENTICATION_BACKENDS = [
+   "django.contrib.auth.backends.ModelBackend",
+   # it should be the last entry to prevent unauthorized access
+   "guest_user.backends.GuestBackend",
+]
+
+CONVERT_FORM = 'pc_configurator.forms.GuestToUserForm'
+CONVERT_URL = 'guest_to_user'
+CONVERT_REDIRECT_URL = 'assemble'

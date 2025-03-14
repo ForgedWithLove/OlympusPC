@@ -32,7 +32,7 @@
           {% load static %}
           <img src="{% static 'images/logo.png' %}" alt="logo" id="navbar_logo" >
         </div>
-        {% if '/login' not in request.path and '/register' not in request.path %}
+        {% if '/login' not in request.path and '/register' not in request.path and '/convert' not in request.path %}
           {% if '/welcome' not in request.path %}
             <div class="navigation_button">
                 <a href="{% url 'welcome' %}">Главная</a>
@@ -44,7 +44,8 @@
             </div>
           {% endif %}
           <div id="log_button">
-            {% if user.is_authenticated %}
+            {% load guest_user %}
+            {% if user.is_authenticated and not user|is_guest_user %}
               <a href="{% url 'logout' %}">Выйти</a>
             {% else %}
               <a href="{% url 'login' %}">Войти</a>
