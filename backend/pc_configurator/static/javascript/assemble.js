@@ -12,6 +12,15 @@ window.onload = function() {
     setFieldHeight();
 };  
 
+document.querySelector("#casecooler_button").addEventListener("click", event => {
+    x = document.getElementById('casecooler_panel');
+    if (x.style.display === 'none') {
+        x.style.display = 'block';
+      } else {
+        x.style.display = 'none';
+      }
+});
+
 document.querySelector("#motherboard_button").addEventListener("mouseover", event => {
     if(document.getElementById("motherboard").className === "component_light"){
         document.getElementById("motherboard").className = "component_light_hovered";

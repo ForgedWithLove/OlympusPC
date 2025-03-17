@@ -9,15 +9,116 @@
 {% endif %}
 <div id="configurator_content">
     <div id="configurator_components_panel">
-        <a href="{% url 'select_processor' %}" class="assembler_button">Процессор</a>
-        <a href="{% url 'select_motherboard' %}" class="assembler_button">Материнская плата</a>
-        <a href="{% url 'select_videocard' %}" class="assembler_button">Видеокарта</a>
-        <a href="{% url 'select_memory' %}" class="assembler_button">Оперативная память</a>
-        <a href="{% url 'select_cooler' %}" class="assembler_button">Процессорный кулер</a>
-        <a href="{% url 'select_case' %}" class="assembler_button">Корпус</a>
-        <a href="{% url 'select_disc' %}" class="assembler_button">Накопитель</a>
-        <a href="{% url 'select_casecooler' %}" class="assembler_button">Корпусные вентиляторы</a>
-        <a href="{% url 'select_powersupply' %}" class="assembler_button">Блок питания</a>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.processor %}
+                <a href="{% url 'select_processor' %}" class="assembler_button link centered">Процессор</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_processor' %}" class="component_selected_type link centered">Процессор</a>
+                    <div class="component_selected_name centered">{{ current_computer.processor.manufacturer.name }} {{ current_computer.processor.series }} {{ current_computer.processor.model }}</div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.motherboard %}
+                <a href="{% url 'select_motherboard' %}" class="assembler_button link centered">Материнская плата</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_motherboard' %}" class="component_selected_type link centered">Материнская плата</a>
+                    <div class="component_selected_name centered">{{ current_computer.motherboard.manufacturer.name }} {{ current_computer.motherboard.model }}</div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.videocard %}
+                <a href="{% url 'select_videocard' %}" class="assembler_button link centered">Видеокарта</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_videocard' %}" class="component_selected_type link centered">Видеокарта</a>
+                    <div class="component_selected_name centered">{{ current_computer.videocard.manufacturer.name }} {{ current_computer.videocard.model }}</div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.memory %}
+                <a href="{% url 'select_memory' %}" class="assembler_button link centered">Оперативная память</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_memory' %}" class="component_selected_type link centered">Оперативная память</a>
+                    <div class="component_selected_name centered">{{ current_computer.memory.manufacturer.name }} {{ current_computer.memory.model }}</div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.cooler %}
+                <a href="{% url 'select_cooler' %}" class="assembler_button link centered">Процессорный кулер</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_cooler' %}" class="component_selected_type link centered">Процессорный кулер</a>
+                    <div class="component_selected_name centered">{{ current_computer.cooler.manufacturer.name }} {{ current_computer.cooler.model }}</div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.case %}
+                <a href="{% url 'select_case' %}" class="assembler_button link centered">Корпус</a>
+            {% else %}
+                <div class="assembler_selected_container" style="width: calc(100% - 70px);">
+                    <a href="{% url 'select_case' %}" class="component_selected_type link centered">Корпус</a>
+                    <div style="height: 40px; width: 100%; display: flex; flex-direction: row;">
+                        <div class="component_selected_name centered" style="width: calc(100% - 40px);">{{ current_computer.case.manufacturer.name }} {{ current_computer.case.model }}</div>
+                        <a class="disc_selected_delete_button link centered" id="casecooler_button">^</a>
+                    </div>
+                </div>
+            {% endif %}
+            <div id="casecooler_panel" style="display: none; bottom: 70px; left: 0px; position: absolute; width: 100%; height: 400px; background-color: green; z-index: 5;">
+                {% for side in sides %}
+                    <div>
+                        <a>{{ side }}</a>
+                        <form method="GET" action="{% url 'select_casecooler' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="side" value="{{ side }}">
+                            <input type="submit" value="Выбрать">
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.discs %}
+                <a href="{% url 'select_disc' %}" class="assembler_button link centered">Накопитель</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_disc' %}" class="component_selected_type link centered">Накопитель</a>
+                    <div style="width: 100%; height: 40px; overflow-y: auto;">
+                        {% for disc in discs %}
+                            <div style="height: 100%; width: 100%; display: flex; flex-direction: row;">
+                                <div class="disc_selected_name centered">{{ disc.manufacturer.name }} {{ disc.model }}</div>
+                                <a  class="disc_selected_delete_button link centered">-</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="assembler_button_container centered">
+            <div class="assembler_button_icon"></div>
+            {% if not current_computer.powersupply %}
+                <a href="{% url 'select_powersupply' %}" class="assembler_button link centered">Блок питания</a>
+            {% else %}
+                <div class="assembler_selected_container">
+                    <a href="{% url 'select_powersupply' %}" class="component_selected_type link centered">Блок питания</a>
+                    <div class="component_selected_name centered">{{ current_computer.powersupply.manufacturer.name }} {{ current_computer.powersupply.model }}</div>
+                </div>
+            {% endif %}
+        </div>
     </div>
     <div id="field">
         <div style="display: flex; align-items: center; justify-content: center; padding: 20px; background-color: purple;">

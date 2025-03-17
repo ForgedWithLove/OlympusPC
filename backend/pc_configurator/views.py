@@ -27,10 +27,14 @@ def assemble(request):
             discs = []
         )
         current_computer.save()
+    sides = (json.loads(current_computer.casecoolers)).keys() if current_computer.casecoolers else []
+    discs = [Disc.objects.get(id=disc_id) for disc_id in current_computer.discs]
     context = {
-        "current_computer": current_computer
+        "current_computer": current_computer,
+        "sides": sides,
+        "discs": discs,
     }
-    return render(request, 'assemble.html')
+    return render(request, 'assemble.html', context)
 
 def select_processor(request):
     if request.user.is_authenticated:
@@ -565,16 +569,19 @@ def add_powersupply(request):
 def add_disc(request):
     id = request.POST['id']
     current_computer = Computer.objects.get(user=request.user, active=True)
-    component = Disc.objects.get(id=id)
-    current_computer.discs.append(component)
+    current_computer.discs.append(id)
     current_computer.save(update_fields=["discs"])
     return redirect('assemble')
 
 def add_casecooler(request):
     id = request.POST['id']
+    side = request.POST['side']
     current_computer = Computer.objects.get(user=request.user, active=True)
-    #component = Casecooler.objects.get(id=id)
+    component = CaseCooler.objects.get(id=id)
     casecoolers = json.loads(current_computer.casecoolers)
-    print(casecoolers)
-    #current_computer.save(update_fields=["casecoolers"])
-    #return redirect('assemble')
+    casecoolers[side]['id'] = id
+    casecoolers[side]['count'] = 1
+    casecoolers[side]['size'] = component.size
+    current_computer.casecoolers = json.dumps(casecoolers)
+    current_computer.save(update_fields=["casecoolers"])
+    return redirect('assemble')

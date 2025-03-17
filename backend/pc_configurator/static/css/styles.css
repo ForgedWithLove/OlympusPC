@@ -214,9 +214,6 @@
     width: 250px;
     height: auto;
     background-color: chocolate;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .comp_title {
@@ -305,9 +302,6 @@
     height: calc(100vh - 90px);
     min-width: min-content;
     min-height: min-content;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .form_container {
@@ -329,20 +323,75 @@
     font-size: 14pt;
     position: sticky;
     top: 90px;
+    z-index: 10;
 }
 
-.assembler_button {
-    border: 2px solid #848b89;
-    background-color: cadetblue;
-    color: black;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
+.assembler_button_container {
+    background-color: rgb(151, 96, 197);
+    flex-direction: row;
     min-width: min-content;
     width: calc(100% - 40px);
     height: 70px;
+    position: relative;
+}
+
+.assembler_selected_container {
+    background-color: rgb(50, 26, 70);
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 70px);
+    height: 100%;
+}
+
+.assembler_button {
+    background-color: cadetblue;
+    text-align: center;
+    font-size: 16px;
+    min-width: min-content;
+    width: calc(100% - 70px);
+    height: 100%;
+}
+
+.assembler_button_icon {
+    width: 70px;
+    height: 100%;
+    background-color: hotpink;
+}
+
+.component_selected_type {
+    height: 30px;
+    font-size: 14px;
+    background-color: limegreen;
+}
+
+.component_selected_name {
+    height: 40px;
+    font-size: 16px;
+    background-color: rgb(66, 163, 114);
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.link {
+    text-decoration: none;
+    color: black;
+}
+
+.disc_selected_name {
+    height: 40px;
+    width: calc(100% - 40px);
+    font-size: 16px;
+    background-color: rgb(66, 163, 114);
+}
+
+.disc_selected_delete_button {
+    height: 40px;
+    width: 40px;
+    font-size: 16px;
+    background-color: rgb(45, 121, 134);
+    border-left: 1px solid black;
 }

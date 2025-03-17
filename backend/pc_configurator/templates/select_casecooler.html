@@ -45,7 +45,7 @@
                 <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ casecooler.manufacturer.name }} {{ casecooler.model }} </div>
             </div>
             <div style="display: flex; flex-direction: row;">
-                <div class="comp_img">
+                <div class="comp_img centered">
                     <img src="{{ casecooler.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
                 </div>
                 <div class="comp_chars">
@@ -79,6 +79,7 @@
                     <div class="comp_add_button_space">
                         <form method="POST" action="{% url 'add_casecooler' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="side" value="{{ request.GET.side }}">
                             <input type="hidden" name="id" value="{{ casecooler.id }}">
                             <input type="submit" value="Добавить">
                         </form>
