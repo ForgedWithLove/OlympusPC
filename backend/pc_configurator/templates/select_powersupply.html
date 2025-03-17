@@ -70,10 +70,10 @@
                         {{ powersupply.price }} ₽
                     </div>
                     <div class="comp_add_button_space">
-                        <form method="POST" action="{% url 'select_powersupply' %}">
+                        <form method="POST" action="{% url 'add_powersupply' %}">
                             {% csrf_token %}
                             <input type="hidden" name="id" value="{{ powersupply.id }}">
-                            <button title="Добавить компонент в сборку">Добавить</button>
+                            <input type="submit" value="Добавить">
                         </form>
                     </div>
                 </div>

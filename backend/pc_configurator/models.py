@@ -286,6 +286,7 @@ class Computer(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
     temporary = models.BooleanField(default=True)
     valid = models.BooleanField(default=False)
 

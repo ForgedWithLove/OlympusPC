@@ -1,3 +1,17 @@
+function setFieldHeight() {
+    var navbarHeight = document.getElementById('navbar').offsetHeight;
+    var guestBarHeight = 0;
+    try {
+        guestBarHeight = document.getElementById('guest_user_bar').offsetHeight;
+    } catch {
+    }
+    document.getElementById('field').setAttribute("style","height: calc(100vh - " + (navbarHeight + guestBarHeight) + "px)");
+}
+
+window.onload = function() {
+    setFieldHeight();
+};  
+
 document.querySelector("#motherboard_button").addEventListener("mouseover", event => {
     if(document.getElementById("motherboard").className === "component_light"){
         document.getElementById("motherboard").className = "component_light_hovered";

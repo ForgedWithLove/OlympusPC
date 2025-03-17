@@ -51,10 +51,9 @@
     padding: 0px;
 }
 
-.field {
+#field {
     background-color: lightseagreen;
     flex-grow: 1;
-    height: calc(100vh - 90px);
     min-width: min-content;
     min-height: min-content;
     display: flex;
@@ -63,14 +62,18 @@
 }
 
 #configurator_components_panel {
-    width: 300px;
+    width: 400px;
     background-color: brown;
-    min-width: 500px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
 }
 
 #configurator_info_panel {
-    width: 300px;
-    background-color: greenyellow;
+    width: 400px;
+    background-color: rgb(204, 71, 30);
 }
 
 .component_light {
@@ -324,4 +327,22 @@
     justify-content: center;
     padding: 5px;
     font-size: 14pt;
+    position: sticky;
+    top: 90px;
+}
+
+.assembler_button {
+    border: 2px solid #848b89;
+    background-color: cadetblue;
+    color: black;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    min-width: min-content;
+    width: calc(100% - 40px);
+    height: 70px;
 }

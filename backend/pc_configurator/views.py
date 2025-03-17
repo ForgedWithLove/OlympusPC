@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from pc_configurator.models import Manufacturer, Processor, Motherboard, Videocard, Memory, Cooler, Case, Disc, CaseCooler, PowerSupply, DiscType, Certificate
+from pc_configurator.models import Manufacturer, Processor, Motherboard, Videocard, Memory, Cooler, Case, Disc, CaseCooler, PowerSupply, DiscType, Certificate, Computer
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import QueryDict
@@ -8,6 +8,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from guest_user.decorators import allow_guest_user
+import json
 
 def welcome(request):
     return render(
@@ -16,6 +17,19 @@ def welcome(request):
 
 @allow_guest_user
 def assemble(request):
+    try:
+        current_computer = Computer.objects.get(user=request.user, active=True)
+    except Computer.DoesNotExist:
+        next_number = Computer.objects.filter(user=request.user).count() + 1
+        current_computer = Computer(
+            user = request.user,
+            name = f'Сборка №{next_number}',
+            discs = []
+        )
+        current_computer.save()
+    context = {
+        "current_computer": current_computer
+    }
     return render(request, 'assemble.html')
 
 def select_processor(request):
@@ -464,10 +478,103 @@ def convert_request(request):
     if request.method == "POST":
         form = GuestToUserForm(request.POST)
         if form.is_valid():
+            current_user = request.user
+            current_computer = Computer.objects.get(user=current_user, active=True)
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, 'Регистрация успешна!')
+            current_computer.id = None
+            current_computer.user = user
+            current_computer.name = f'Сборка №1'
+            current_computer.save()
             return redirect("assemble")
         messages.error(request, "Введена некорректная информация.")
     form = GuestToUserForm()
     return render (request=request, template_name="convert.html", context={"convert_form":form})
+
+def add_processor(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Processor.objects.get(id=id)
+    current_computer.processor = component
+    current_computer.save(update_fields=["processor"])
+    return redirect('assemble')
+
+def add_motherboard(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Motherboard.objects.get(id=id)
+    current_computer.motherboard = component
+    current_computer.save(update_fields=["motherboard"])
+    return redirect('assemble')
+
+def add_videocard(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Videocard.objects.get(id=id)
+    current_computer.videocard = component
+    current_computer.save(update_fields=["videocard"])
+    return redirect('assemble')
+
+def add_memory(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Memory.objects.get(id=id)
+    current_computer.memory = component
+    current_computer.save(update_fields=["memory"])
+    return redirect('assemble')
+
+def add_cooler(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Cooler.objects.get(id=id)
+    current_computer.cooler = component
+    current_computer.save(update_fields=["cooler"])
+    return redirect('assemble')
+
+def add_case(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Case.objects.get(id=id)
+    current_computer.case = component
+    big_res = {}
+    res = {}
+    sides = (json.loads(component.cooler_slots)).keys()
+    installed = json.loads(component.installed_coolers)
+    for side in sides:
+        if side in installed:
+            res['id'] = CaseCooler.objects.get(model='Предустановленный кулер').id
+            res['count'] = installed[side]['Количество']
+            res['size'] = installed[side]['Размер']
+            big_res[side] = res
+            res = {}
+        else:
+            big_res[side] = {}
+    current_computer.casecoolers = json.dumps(big_res, sort_keys=True)
+    current_computer.save(update_fields=["case", "casecoolers"])
+    return redirect('assemble')
+
+def add_powersupply(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = PowerSupply.objects.get(id=id)
+    current_computer.powersupply = component
+    current_computer.save(update_fields=["powersupply"])
+    return redirect('assemble')
+
+def add_disc(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    component = Disc.objects.get(id=id)
+    current_computer.discs.append(component)
+    current_computer.save(update_fields=["discs"])
+    return redirect('assemble')
+
+def add_casecooler(request):
+    id = request.POST['id']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    #component = Casecooler.objects.get(id=id)
+    casecoolers = json.loads(current_computer.casecoolers)
+    print(casecoolers)
+    #current_computer.save(update_fields=["casecoolers"])
+    #return redirect('assemble')

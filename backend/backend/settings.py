@@ -155,8 +155,6 @@ CELERY_RESULT_BACKEND = os.environ.get("RESULT_BACKEND", "redis://localhost:6379
 MEDIA_ROOT = os.path.join(BASE_DIR, 'pc_configurator/media')
 MEDIA_URL = '/pc_configurator/media/'
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTHENTICATION_BACKENDS = [

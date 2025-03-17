@@ -77,7 +77,11 @@
                         {{ casecooler.price }} ₽
                     </div>
                     <div class="comp_add_button_space">
-                        <button title="Добавить компонент в сборку">Добавить</button>
+                        <form method="POST" action="{% url 'add_casecooler' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ casecooler.id }}">
+                            <input type="submit" value="Добавить">
+                        </form>
                     </div>
                 </div>
             </div>

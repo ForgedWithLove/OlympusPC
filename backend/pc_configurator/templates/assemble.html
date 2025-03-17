@@ -9,9 +9,17 @@
 {% endif %}
 <div id="configurator_content">
     <div id="configurator_components_panel">
-     
+        <a href="{% url 'select_processor' %}" class="assembler_button">Процессор</a>
+        <a href="{% url 'select_motherboard' %}" class="assembler_button">Материнская плата</a>
+        <a href="{% url 'select_videocard' %}" class="assembler_button">Видеокарта</a>
+        <a href="{% url 'select_memory' %}" class="assembler_button">Оперативная память</a>
+        <a href="{% url 'select_cooler' %}" class="assembler_button">Процессорный кулер</a>
+        <a href="{% url 'select_case' %}" class="assembler_button">Корпус</a>
+        <a href="{% url 'select_disc' %}" class="assembler_button">Накопитель</a>
+        <a href="{% url 'select_casecooler' %}" class="assembler_button">Корпусные вентиляторы</a>
+        <a href="{% url 'select_powersupply' %}" class="assembler_button">Блок питания</a>
     </div>
-    <div class="field">
+    <div id="field">
         <div style="display: flex; align-items: center; justify-content: center; padding: 20px; background-color: purple;">
             <div style="background-color: blue; contain: layout; display: inline-block;">
                 {% load static %}
@@ -30,5 +38,5 @@
     Тут когда-нибудь будет шедевр
 </div>
 {% load static %}
-<script src="{% static 'javascript/configurator.js' %}"></script>
+<script src="{% static 'javascript/assemble.js' %}"></script>
 {% endblock %}

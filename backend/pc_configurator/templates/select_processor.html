@@ -73,7 +73,11 @@
                         {{ cpu.price }} ₽
                     </div>
                     <div class="comp_add_button_space">
-                        <button title="Добавить компонент в сборку">Добавить</button>
+                        <form method="POST" action="{% url 'add_processor' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ cpu.id }}">
+                            <input type="submit" value="Добавить">
+                        </form>
                     </div>
                 </div>
             </div>
