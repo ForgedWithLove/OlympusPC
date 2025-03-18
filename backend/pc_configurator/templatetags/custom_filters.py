@@ -50,4 +50,23 @@ def pfc_output(pfc):
     else:
         return 'Пассивный'
     
+@register.filter
+def get_casecooler_count(json_str, side):
+    try:
+        return json.loads(json_str)[side]['count']
+    except KeyError:
+        return 0
 
+@register.filter
+def get_casecooler_id(json_str, side):
+    try:
+        return json.loads(json_str)[side]['id']
+    except KeyError:
+        return 0
+
+@register.filter
+def get_casecooler_name(casecoolers, side):
+    if casecoolers[side].manufacturer is not None:
+        return f'{casecoolers[side].manufacturer.name} {casecoolers[side].model}'
+    else:
+        return casecoolers[side].model

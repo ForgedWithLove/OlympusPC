@@ -15,7 +15,7 @@ window.onload = function() {
 document.querySelector("#casecooler_button").addEventListener("click", event => {
     x = document.getElementById('casecooler_panel');
     if (x.style.display === 'none') {
-        x.style.display = 'block';
+        x.style.display = 'flex';
       } else {
         x.style.display = 'none';
       }

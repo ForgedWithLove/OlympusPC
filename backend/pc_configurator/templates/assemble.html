@@ -77,15 +77,56 @@
                     </div>
                 </div>
             {% endif %}
-            <div id="casecooler_panel" style="display: none; bottom: 70px; left: 0px; position: absolute; width: 100%; height: 400px; background-color: green; z-index: 5;">
+            <div id="casecooler_panel" style="display: none; bottom: 70px; left: 0px; position: absolute; width: 100%; height: 300px; background-color: green; z-index: 5; flex-direction: column; justify-content: space-evenly;">
                 {% for side in sides %}
-                    <div>
-                        <a>{{ side }}</a>
-                        <form method="GET" action="{% url 'select_casecooler' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="side" value="{{ side }}">
-                            <input type="submit" value="Выбрать">
-                        </form>
+                    <div class="assembler_button_container centered" style="width: 100%;">
+                        <div class="assembler_button_icon"></div>
+                        {% load custom_filters %}
+                        {% if current_computer.casecoolers|get_casecooler_id:side == 0 %}
+                            <div style="width: calc(100% - 70px); height: 100%;">
+                                <form method="GET" action="{% url 'select_casecooler' %}" style="height: 100%;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="side" value="{{ side }}">
+                                    <input type="submit" value="{{ side }}" class="assembler_button link centered" style="width: 100%; border: none;">
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="assembler_selected_container">
+                                <div style="width: 100%; height: 30px; display: flex; flex-direction: row;">
+                                    <div style="width: calc(100% - 90px); height: 100%;">
+                                        <form method="GET" action="{% url 'select_casecooler' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="side" value="{{ side }}">
+                                            <input type="submit" value="{{ side }}" class="component_selected_type link centered" style="width: 100%; border: none;">
+                                        </form>
+                                    </div>
+                                    {% if current_computer.casecoolers|get_casecooler_count:side > 1 %}
+                                        <form method="POST" action="{% url 'dec_casecooler' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ current_computer.casecoolers|get_casecooler_id:side }}">
+                                            <input type="hidden" name="side" value="{{ side }}">
+                                            <input type="submit" value="-" class="link centered" style="width: 30px; height: 30px; border: none;">
+                                        </form>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'del_casecooler' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="side" value="{{ side }}">
+                                            <input type="submit" value="D" class="link centered" style="width: 30px; height: 30px; border: none;">
+                                        </form>
+                                    {% endif %}
+                                    <div style="width: 30px; height: 30px; background-color: white; font-size: 14px;" class="centered">
+                                        {{ current_computer.casecoolers|get_casecooler_count:side }}
+                                    </div>
+                                    <form method="POST" action="{% url 'inc_casecooler' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="id" value="{{ current_computer.casecoolers|get_casecooler_id:side }}">
+                                        <input type="hidden" name="side" value="{{ side }}">
+                                        <input type="submit" value="+" class="link centered" style="width: 30px; height: 30px; border: none;">
+                                    </form>
+                                </div>
+                                <div class="component_selected_name centered">{{ installed_casecoolers|get_casecooler_name:side }}</div>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -101,7 +142,11 @@
                         {% for disc in discs %}
                             <div style="height: 100%; width: 100%; display: flex; flex-direction: row;">
                                 <div class="disc_selected_name centered">{{ disc.manufacturer.name }} {{ disc.model }}</div>
-                                <a  class="disc_selected_delete_button link centered">-</a>
+                                <form method="POST" action="{% url 'delete_disc' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{ disc.id }}">
+                                    <input type="submit" value="-" class="disc_selected_delete_button link centered">
+                                </form>
                             </div>
                         {% endfor %}
                     </div>

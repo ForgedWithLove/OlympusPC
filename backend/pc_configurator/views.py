@@ -27,11 +27,24 @@ def assemble(request):
             discs = []
         )
         current_computer.save()
-    sides = (json.loads(current_computer.casecoolers)).keys() if current_computer.casecoolers else []
+    casecoolers = current_computer.casecoolers
+    if casecoolers:
+        casecoolers = json.loads(casecoolers)
+        sides = casecoolers.keys()
+        installed_casecoolers = {}
+        for key in sides:
+            try:
+                installed_casecoolers[key] = (CaseCooler.objects.get(id=casecoolers[key]['id']))
+            except KeyError:
+                pass
+    else:
+        sides = []
+        installed_casecoolers = {}
     discs = [Disc.objects.get(id=disc_id) for disc_id in current_computer.discs]
     context = {
         "current_computer": current_computer,
         "sides": sides,
+        "installed_casecoolers": installed_casecoolers,
         "discs": discs,
     }
     return render(request, 'assemble.html', context)
@@ -567,14 +580,14 @@ def add_powersupply(request):
     return redirect('assemble')
 
 def add_disc(request):
-    id = request.POST['id']
+    id = int(request.POST['id'])
     current_computer = Computer.objects.get(user=request.user, active=True)
     current_computer.discs.append(id)
     current_computer.save(update_fields=["discs"])
     return redirect('assemble')
 
 def add_casecooler(request):
-    id = request.POST['id']
+    id = int(request.POST['id'])
     side = request.POST['side']
     current_computer = Computer.objects.get(user=request.user, active=True)
     component = CaseCooler.objects.get(id=id)
@@ -582,6 +595,42 @@ def add_casecooler(request):
     casecoolers[side]['id'] = id
     casecoolers[side]['count'] = 1
     casecoolers[side]['size'] = component.size
+    current_computer.casecoolers = json.dumps(casecoolers)
+    current_computer.save(update_fields=["casecoolers"])
+    return redirect('assemble')
+
+def delete_disc(request):
+    id = int(request.POST['id'])
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    current_computer.discs.remove(id)
+    current_computer.save(update_fields=["discs"])
+    return redirect('assemble')
+
+def inc_casecooler(request):
+    id = int(request.POST['id'])
+    side = request.POST['side']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    casecoolers = json.loads(current_computer.casecoolers)
+    casecoolers[side]['count'] += 1
+    current_computer.casecoolers = json.dumps(casecoolers)
+    current_computer.save(update_fields=["casecoolers"])
+    return redirect('assemble')
+
+def dec_casecooler(request):
+    id = int(request.POST['id'])
+    side = request.POST['side']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    casecoolers = json.loads(current_computer.casecoolers)
+    casecoolers[side]['count'] -= 1
+    current_computer.casecoolers = json.dumps(casecoolers)
+    current_computer.save(update_fields=["casecoolers"])
+    return redirect('assemble')
+
+def delete_casecooler(request):
+    side = request.POST['side']
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    casecoolers = json.loads(current_computer.casecoolers)
+    casecoolers[side] = {}
     current_computer.casecoolers = json.dumps(casecoolers)
     current_computer.save(update_fields=["casecoolers"])
     return redirect('assemble')
