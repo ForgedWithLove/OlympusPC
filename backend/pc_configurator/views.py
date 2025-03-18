@@ -538,7 +538,8 @@ def add_memory(request):
     current_computer = Computer.objects.get(user=request.user, active=True)
     component = Memory.objects.get(id=id)
     current_computer.memory = component
-    current_computer.save(update_fields=["memory"])
+    current_computer.memory_cnt = 1
+    current_computer.save(update_fields=["memory", "memory_cnt"])
     return redirect('assemble')
 
 def add_cooler(request):
@@ -607,7 +608,6 @@ def delete_disc(request):
     return redirect('assemble')
 
 def inc_casecooler(request):
-    id = int(request.POST['id'])
     side = request.POST['side']
     current_computer = Computer.objects.get(user=request.user, active=True)
     casecoolers = json.loads(current_computer.casecoolers)
@@ -617,7 +617,6 @@ def inc_casecooler(request):
     return redirect('assemble')
 
 def dec_casecooler(request):
-    id = int(request.POST['id'])
     side = request.POST['side']
     current_computer = Computer.objects.get(user=request.user, active=True)
     casecoolers = json.loads(current_computer.casecoolers)
@@ -633,4 +632,23 @@ def delete_casecooler(request):
     casecoolers[side] = {}
     current_computer.casecoolers = json.dumps(casecoolers)
     current_computer.save(update_fields=["casecoolers"])
+    return redirect('assemble')
+
+def inc_memory(request):
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    current_computer.memory_cnt *= 2
+    current_computer.save(update_fields=["memory_cnt"])
+    return redirect('assemble')
+
+def dec_memory(request):
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    current_computer.memory_cnt /= 2
+    current_computer.save(update_fields=["memory_cnt"])
+    return redirect('assemble')
+
+def delete_memory(request):
+    current_computer = Computer.objects.get(user=request.user, active=True)
+    current_computer.memory = None
+    current_computer.memory_cnt = None
+    current_computer.save(update_fields=["memory", "memory_cnt"])
     return redirect('assemble')

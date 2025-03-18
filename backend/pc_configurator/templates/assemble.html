@@ -48,7 +48,33 @@
                 <a href="{% url 'select_memory' %}" class="assembler_button link centered">Оперативная память</a>
             {% else %}
                 <div class="assembler_selected_container">
-                    <a href="{% url 'select_memory' %}" class="component_selected_type link centered">Оперативная память</a>
+                    <div style="width: 100%; height: 30px; display: flex; flex-direction: row;">
+                        <div style="width: calc(100% - 90px); height: 100%;">
+                            <form method="GET" action="{% url 'select_memory' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="side" value="{{ side }}">
+                                <input type="submit" value="Оперативная память" class="component_selected_type link centered" style="width: 100%; border: none;">
+                            </form>
+                        </div>
+                        {% if current_computer.memory_cnt > 1 %}
+                            <form method="POST" action="{% url 'dec_memory' %}">
+                                {% csrf_token %}
+                                <input type="submit" value="-" class="link centered" style="width: 30px; height: 30px; border: none;">
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{% url 'del_memory' %}">
+                                {% csrf_token %}
+                                <input type="submit" value="D" class="link centered" style="width: 30px; height: 30px; border: none;">
+                            </form>
+                        {% endif %}
+                        <div style="width: 30px; height: 30px; background-color: white; font-size: 14px;" class="centered">
+                            {{ current_computer.memory_cnt }}
+                        </div>
+                        <form method="POST" action="{% url 'inc_memory' %}">
+                            {% csrf_token %}
+                            <input type="submit" value="+" class="link centered" style="width: 30px; height: 30px; border: none;">
+                        </form>
+                    </div>
                     <div class="component_selected_name centered">{{ current_computer.memory.manufacturer.name }} {{ current_computer.memory.model }}</div>
                 </div>
             {% endif %}
@@ -103,7 +129,6 @@
                                     {% if current_computer.casecoolers|get_casecooler_count:side > 1 %}
                                         <form method="POST" action="{% url 'dec_casecooler' %}">
                                             {% csrf_token %}
-                                            <input type="hidden" name="id" value="{{ current_computer.casecoolers|get_casecooler_id:side }}">
                                             <input type="hidden" name="side" value="{{ side }}">
                                             <input type="submit" value="-" class="link centered" style="width: 30px; height: 30px; border: none;">
                                         </form>
@@ -119,7 +144,6 @@
                                     </div>
                                     <form method="POST" action="{% url 'inc_casecooler' %}">
                                         {% csrf_token %}
-                                        <input type="hidden" name="id" value="{{ current_computer.casecoolers|get_casecooler_id:side }}">
                                         <input type="hidden" name="side" value="{{ side }}">
                                         <input type="submit" value="+" class="link centered" style="width: 30px; height: 30px; border: none;">
                                     </form>
