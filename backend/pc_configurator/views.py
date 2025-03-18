@@ -503,6 +503,7 @@ def convert_request(request):
             current_computer.id = None
             current_computer.user = user
             current_computer.name = f'Сборка №1'
+            current_computer.temporary = False
             current_computer.save()
             return redirect("assemble")
         messages.error(request, "Введена некорректная информация.")
