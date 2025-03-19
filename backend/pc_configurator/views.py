@@ -9,6 +9,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from guest_user.decorators import allow_guest_user
 import json
+from guest_user.functions import is_guest_user
 
 def welcome(request):
     return render(
@@ -24,7 +25,8 @@ def assemble(request):
         current_computer = Computer(
             user = request.user,
             name = f'Сборка №{next_number}',
-            discs = []
+            discs = [],
+            temporary = is_guest_user(request.user)
         )
         current_computer.save()
     casecoolers = current_computer.casecoolers
