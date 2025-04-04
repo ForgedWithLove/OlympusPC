@@ -21,6 +21,10 @@ def get_json_keys(json_str):
     return json.loads(json_str).keys()
 
 @register.filter
+def array_len(array):
+    return len(array)
+
+@register.filter
 def array_output(array, output_len):
     string = ''
     length = output_len

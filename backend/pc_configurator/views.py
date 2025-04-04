@@ -10,6 +10,7 @@ from django.contrib import messages
 from guest_user.decorators import allow_guest_user
 import json
 from guest_user.functions import is_guest_user
+from pc_configurator.functions import assembly_is_valid, get_error_desciption
 
 def welcome(request):
     return render(
@@ -43,11 +44,16 @@ def assemble(request):
         sides = []
         installed_casecoolers = {}
     discs = [Disc.objects.get(id=disc_id) for disc_id in current_computer.discs]
+    is_valid = assembly_is_valid(current_computer)
+    valid = is_valid[0]
+    errors = list(map(lambda index: get_error_desciption(index), is_valid[1]))
     context = {
         "current_computer": current_computer,
         "sides": sides,
         "installed_casecoolers": installed_casecoolers,
         "discs": discs,
+        "valid": valid,
+        "errors": errors,
     }
     return render(request, 'assemble.html', context)
 

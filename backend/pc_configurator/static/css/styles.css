@@ -59,6 +59,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 #configurator_components_panel {

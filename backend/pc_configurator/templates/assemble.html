@@ -16,7 +16,7 @@
             {% else %}
                 <div class="assembler_selected_container">
                     <a href="{% url 'select_processor' %}" class="component_selected_type link centered">Процессор</a>
-                    <div class="component_selected_name centered">{{ current_computer.processor.manufacturer.name }} {{ current_computer.processor.series }} {{ current_computer.processor.model }}</div>
+                    <div class="component_selected_name centered" id="processor_name">{{ current_computer.processor.manufacturer.name }} {{ current_computer.processor.series }} {{ current_computer.processor.model }}</div>
                 </div>
             {% endif %}
         </div>
@@ -27,7 +27,7 @@
             {% else %}
                 <div class="assembler_selected_container">
                     <a href="{% url 'select_motherboard' %}" class="component_selected_type link centered">Материнская плата</a>
-                    <div class="component_selected_name centered">{{ current_computer.motherboard.manufacturer.name }} {{ current_computer.motherboard.model }}</div>
+                    <div class="component_selected_name centered" id="motherboard_name">{{ current_computer.motherboard.manufacturer.name }} {{ current_computer.motherboard.model }}</div>
                 </div>
             {% endif %}
         </div>
@@ -38,7 +38,7 @@
             {% else %}
                 <div class="assembler_selected_container">
                     <a href="{% url 'select_videocard' %}" class="component_selected_type link centered">Видеокарта</a>
-                    <div class="component_selected_name centered">{{ current_computer.videocard.manufacturer.name }} {{ current_computer.videocard.model }}</div>
+                    <div class="component_selected_name centered" id="videocard_name">{{ current_computer.videocard.manufacturer.name }} {{ current_computer.videocard.model }}</div>
                 </div>
             {% endif %}
         </div>
@@ -75,7 +75,7 @@
                             <input type="submit" value="+" class="link centered" style="width: 30px; height: 30px; border: none;">
                         </form>
                     </div>
-                    <div class="component_selected_name centered">{{ current_computer.memory.manufacturer.name }} {{ current_computer.memory.model }}</div>
+                    <div class="component_selected_name centered" id="memory_name">{{ current_computer.memory.manufacturer.name }} {{ current_computer.memory.model }}</div>
                 </div>
             {% endif %}
         </div>
@@ -86,7 +86,7 @@
             {% else %}
                 <div class="assembler_selected_container">
                     <a href="{% url 'select_cooler' %}" class="component_selected_type link centered">Процессорный кулер</a>
-                    <div class="component_selected_name centered">{{ current_computer.cooler.manufacturer.name }} {{ current_computer.cooler.model }}</div>
+                    <div class="component_selected_name centered" id="cooler_name">{{ current_computer.cooler.manufacturer.name }} {{ current_computer.cooler.model }}</div>
                 </div>
             {% endif %}
         </div>
@@ -98,7 +98,7 @@
                 <div class="assembler_selected_container" style="width: calc(100% - 70px);">
                     <a href="{% url 'select_case' %}" class="component_selected_type link centered">Корпус</a>
                     <div style="height: 40px; width: 100%; display: flex; flex-direction: row;">
-                        <div class="component_selected_name centered" style="width: calc(100% - 40px);">{{ current_computer.case.manufacturer.name }} {{ current_computer.case.model }}</div>
+                        <div class="component_selected_name centered" id="case_name" style="width: calc(100% - 40px);">{{ current_computer.case.manufacturer.name }} {{ current_computer.case.model }}</div>
                         <a class="disc_selected_delete_button link centered" id="casecooler_button">^</a>
                     </div>
                 </div>
@@ -184,12 +184,52 @@
             {% else %}
                 <div class="assembler_selected_container">
                     <a href="{% url 'select_powersupply' %}" class="component_selected_type link centered">Блок питания</a>
-                    <div class="component_selected_name centered">{{ current_computer.powersupply.manufacturer.name }} {{ current_computer.powersupply.model }}</div>
+                    <div class="component_selected_name centered" id="powersupply_name">{{ current_computer.powersupply.manufacturer.name }} {{ current_computer.powersupply.model }}</div>
                 </div>
             {% endif %}
         </div>
     </div>
     <div id="field">
+        <div id="processor_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.processor %}
+                {{ current_computer.processor.socket }}
+            {% endif %}
+        </div>
+        <div id="motherboard_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.motherboard %}
+                {{ current_computer.motherboard.socket }}
+            {% endif %}
+        </div>
+        <div id="videocard_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.videocard %}
+                {{ current_computer.videocard.mem_volume }}
+            {% endif %}
+        </div>
+        <div id="memory_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.memory %}
+                {{ current_computer.memory.volume }}
+            {% endif %}
+        </div>
+        <div id="cooler_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.cooler %}
+                {{ current_computer.cooler.power }}
+            {% endif %}
+        </div>
+        <div id="case_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.case %}
+                {{ current_computer.case.typesize }}
+            {% endif %}
+        </div>
+        <div id="discs_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if discs|array_len > 0 %}
+                {{ discs }}
+            {% endif %}
+        </div>
+        <div id="powersupply_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+            {% if current_computer.powersupply %}
+                {{ current_computer.powersupply.power }}
+            {% endif %}
+        </div>
         <div style="display: flex; align-items: center; justify-content: center; padding: 20px; background-color: purple;">
             <div style="background-color: blue; contain: layout; display: inline-block;">
                 {% load static %}
@@ -201,7 +241,12 @@
         </div>
     </div>
     <div id="configurator_info_panel">
-
+        {{ valid }}
+        {% for error in errors %}
+            <div>
+                {{ error }}
+            </div>
+        {% endfor %}
     </div>
 </div>
 <div>
