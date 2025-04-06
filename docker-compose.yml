@@ -22,6 +22,9 @@ services:
             - type: bind
               source: backend/pc_configurator/media
               target: /app/backend/pc_configurator/media
+            - type: bind
+              source: backend/pc_configurator/migrations
+              target: /app/backend/pc_configurator/migrations
         expose:
             - 8000     
         environment:

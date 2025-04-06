@@ -85,4 +85,9 @@ class Migration(migrations.Migration):
             name='id',
             field=models.AutoField(primary_key=True, serialize=False),
         ),
+        migrations.AddField(
+            model_name='computer',
+            name='active',
+            field=models.BooleanField(default=True),
+        ),
     ]
