@@ -33,5 +33,8 @@ urlpatterns = [
     path("login/", views.login_request, name="login"),
     path("logout/", views.logout_request, name="logout"),
     path("convert/", views.convert_request, name="guest_to_user"),
-    path('assemble/', views.assemble, name='assemble'),
+    path('assemble/manual', views.assemble, name='assemble'),
+    path('assemble/auto/apps', views.select_apps, name='select_apps'),
+    path('assemble/auto/chars', views.select_chars, name='select_chars'),
+    path('assemble/auto/configuration', views.auto_configuration, name='auto_configuration'),
 ]

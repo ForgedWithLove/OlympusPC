@@ -314,17 +314,20 @@
     margin: 10px;
 }
 
-#guest_user_bar {
+.top_bar {
     width: 100%;
-    background-color: gold;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 5px;
-    font-size: 14pt;
     position: sticky;
     top: 90px;
     z-index: 10;
+}
+
+#guest_user_bar {
+    background-color: gold;
+    font-size: 14pt;
 }
 
 .assembler_button_container {
@@ -398,4 +401,101 @@
     border-top: none;
     border-right: none;
     border-bottom: none;
+}
+
+.app_checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 50px;
+    height:50px;
+    border: 2px solid;
+    border-color: green;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    margin: 0;
+    background-image: url("/pc_configurator/media/icons/add_to_list.png");
+    background-size: auto calc(100% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.app_checkbox:hover {
+    box-shadow: 0px 0px 6px 2px #52ac58;
+}
+
+.app_checkbox:checked:hover {
+    box-shadow: 0px 0px 6px 2px #be2222;
+}
+
+.app_checkbox:checked {
+    border-color: red;
+    background-image: url("/pc_configurator/media/icons/remove_from_list.png");
+}
+
+.char_checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    margin: 0;
+    background-image: url("/pc_configurator/media/icons/locked.png");
+    background-size: 30px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.char_checkbox:hover {
+
+}
+
+.char_checkbox:checked:hover {
+
+}
+
+.char_checkbox:checked {
+    background-image: url("/pc_configurator/media/icons/unlocked.png");
+}
+
+.chars_show_button {
+    background-image: url('/pc_configurator/media/icons/arrow_down.png');
+    width: 100%;
+    height: 100%;
+    background-size: auto 35px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.simple_checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    margin: 0;
+    background-image: none;
+    background-size: 24px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
+    border-radius: 5px;
+    transition: 0.2s;
+}
+
+.simple_checkbox:hover {
+
+}
+
+.simple_checkbox:checked:hover {
+
+}
+
+.simple_checkbox:checked {
+    background-image: url("/pc_configurator/media/icons/checked.png");
+    background-color: rgba(255,255,255, 0.8);
+}
+
+.simple_checkbox:disabled {
+    filter: brightness(80%);
 }

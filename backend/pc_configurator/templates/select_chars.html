@@ -1,0 +1,364 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<form method="GET" action="{% url 'auto_configuration' %}">
+    {% csrf_token %}
+    <input type="hidden" name="selected_apps" value="{{ selected_apps }}">
+    <div class="top_bar" style="background-color: cyan; height: 50px;">
+        <input type="submit" value="Подобрать">
+    </div>
+    <div class="centered" style="width: 100%; min-height: calc(100vh - 90px); background-color: gray;">
+        <div style="width: 86%; height: 100%; display: flex; flex-direction: column;">
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; background-color: #7C95A1">
+                <div style="display: flex; align-items: center; width: 100%;">
+                    <div style="height: 50px; width: 50px;">
+                        <button class="chars_show_button">
+                    </div>
+                    <div style="height: 50px; width: calc(100% - 50px); display: flex; align-items: center; font-size: 20px;">
+                        Процессор
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="manufacturer_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Производитель
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <select id="manufacturer_field" name="manufacturer" disabled style="width: 240px; height: 30px;">
+                                {% for manufacturer in manufacturers %}
+                                    <option value="{{manufacturer.id}}">{{manufacturer.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="socket_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Сокет
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <select id="socket_field" name="socket" disabled style="width: 240px; height: 30px;">
+                                {% for socket in sockets %}
+                                    <option value="{{socket}}">{{socket}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; background-color: #7C95A1">
+                <div style="display: flex; align-items: center; width: 100%;">
+                    <div style="height: 50px; width: 50px;">
+                        <button class="chars_show_button">
+                    </div>
+                    <div style="height: 50px; width: calc(100% - 50px); display: flex; align-items: center; font-size: 20px;">
+                        Видеокарта
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="nodiscrete_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Без видеокарты
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="checkbox" value="nodiscrete" name="nodiscrete" class="simple_checkbox" id="nodiscrete_check" disabled>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="videochip_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Графический процессор
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <select id="videochip_field" name="videochip" disabled style="width: 240px; height: 30px;">
+                                {% for chip in chips %}
+                                    <option value="{{chip}}">{{chip}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="maxmonitors_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Количество мониторов
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="number" name="maxmonitors" placeholder="до {{max_monitors}}" disabled style="width: 240px; height: 30px; border-radius: 3px; border: 1px;" id="maxmonitors_field" min="1" max="{{max_monitors}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; background-color: #7C95A1">
+                <div style="display: flex; align-items: center; width: 100%;">
+                    <div style="height: 50px; width: 50px;">
+                        <button class="chars_show_button">
+                    </div>
+                    <div style="height: 50px; width: calc(100% - 50px); display: flex; align-items: center; font-size: 20px;">
+                        Память
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="ssdonly_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Только SSD
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="checkbox" value="ssdonly" name="ssdonly" class="simple_checkbox" id="ssdonly_check" disabled>
+                        </div>
+                    </div><div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="discvol_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Объём накопителей
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="number" name="discvol" placeholder="от {{min_disc}} Гб" disabled style="width: 240px; height: 30px; border-radius: 3px; border: 1px;" id="discvol_field" min="{{min_disc}}" step="{{min_disc}}">
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="memvol_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Объём оперативной памяти
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="number" name="memvol" placeholder="от {{min_memory}} до {{max_memory}} Гб" disabled style="width: 240px; height: 30px; border-radius: 3px; border: 1px;" id="memvol_field" min="{{min_memory}}" max="{{max_memory}}" step="{{min_memory}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; background-color: #7C95A1">
+                <div style="display: flex; align-items: center; width: 100%;">
+                    <div style="height: 50px; width: 50px;">
+                        <button class="chars_show_button">
+                    </div>
+                    <div style="height: 50px; width: calc(100% - 50px); display: flex; align-items: center; font-size: 20px;">
+                        Сборка
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                        <div style="display: flex; align-items: center; width: 100%;">
+                            <div style="height: 50px; width: 50px;"></div>
+                            <div style="height: 50px; width: 50px;">
+                                <input type="checkbox" class="char_checkbox" id="typesize_lock">
+                            </div>
+                            <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                                Типоразмер корпуса
+                            </div>
+                            <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                                <select id="typesize_field" name="typesize" disabled style="width: 240px; height: 30px;">
+                                    {% for typesize in typesizes %}
+                                        <option value="{{typesize}}">{{typesize}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="maxprice_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Стоимость
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="number" name="maxprice" disabled style="width: 240px; height: 30px; border-radius: 3px; border: 1px;" id="maxprice_field" min="{{min_price}}" step="500">
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="overclock_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            Разгон
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="checkbox" value="overclock" name="overclock" class="simple_checkbox" id="overclock_check" disabled>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div style="height: 50px; width: 50px;"></div>
+                        <div style="height: 50px; width: 50px;">
+                            <input type="checkbox" class="char_checkbox" id="wifi_lock">
+                        </div>
+                        <div style="height: 50px; width: 20%; display: flex; align-items: center; font-size: 16px;">
+                            WiFi и Bluetooth
+                        </div>
+                        <div style="height: 50px; width: calc(80% - 100px); display: flex; align-items: center; ">
+                            <input type="checkbox" value="wifi" name="wifi" class="simple_checkbox" id="wifi_check" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    document.getElementById('manufacturer_field').selectedIndex = -1;
+    document.getElementById('socket_field').selectedIndex = -1;
+    document.getElementById('videochip_field').selectedIndex = -1;
+    document.getElementById('typesize_field').selectedIndex = -1;
+
+    var arrows = document.querySelectorAll('.chars_show_button');
+    for (let i = 0; i < arrows.length; i++) {
+        arrows[i].addEventListener("click", event => {
+            x = arrows[i].parentElement.parentElement.parentElement.children[1];
+            if (x.style.display === 'none') {
+                x.style.display = 'block';
+                arrows[i].style.backgroundImage = "url('/pc_configurator/media/icons/arrow_down.png')";
+            } else {
+                x.style.display = 'none';
+                arrows[i].style.backgroundImage =" url('/pc_configurator/media/icons/arrow_right.png')";
+            }
+        });
+    }
+    var manufacturer_lock = document.getElementById('manufacturer_lock');
+    manufacturer_lock.addEventListener("change", event => {
+        manufacturer_field = document.getElementById('manufacturer_field');
+        if (manufacturer_lock.checked === true) {
+            manufacturer_field.disabled = false;
+        } else {
+            manufacturer_field.disabled = true;
+            manufacturer_field.selectedIndex = -1;
+        }
+    });
+    var socket_lock = document.getElementById('socket_lock');
+    socket_lock.addEventListener("change", event => {
+        socket_field = document.getElementById('socket_field');
+        if (socket_lock.checked === true) {
+            socket_field.disabled = false;
+        } else {
+            socket_field.disabled = true;
+            socket_field.selectedIndex = -1;
+        }
+    });
+    var videochip_lock = document.getElementById('videochip_lock');
+    videochip_lock.addEventListener("change", event => {
+        videochip_field = document.getElementById('videochip_field');
+        if (videochip_lock.checked === true) {
+            videochip_field.disabled = false;
+        } else {
+            videochip_field.disabled = true;
+            videochip_field.selectedIndex = -1;
+        }
+    });
+    var typesize_lock = document.getElementById('typesize_lock');
+    typesize_lock.addEventListener("change", event => {
+        typesize_field = document.getElementById('typesize_field');
+        if (typesize_lock.checked === true) {
+            typesize_field.disabled = false;
+        } else {
+            typesize_field.disabled = true;
+            typesize_field.selectedIndex = -1;
+        }
+    });
+    var nodiscrete_lock = document.getElementById('nodiscrete_lock');
+    nodiscrete_lock.addEventListener("change", event => {
+        nodiscrete_check = document.getElementById('nodiscrete_check');
+        if (nodiscrete_lock.checked === true) {
+            nodiscrete_check.disabled = false;
+        } else {
+            nodiscrete_check.disabled = true;
+            nodiscrete_check.checked = false;
+        }
+    });
+    var ssdonly_lock = document.getElementById('ssdonly_lock');
+    ssdonly_lock.addEventListener("change", event => {
+        ssdonly_check = document.getElementById('ssdonly_check');
+        if (ssdonly_lock.checked === true) {
+            ssdonly_check.disabled = false;
+        } else {
+            ssdonly_check.disabled = true;
+            ssdonly_check.checked = false;
+        }
+    });
+    var overclock_lock = document.getElementById('overclock_lock');
+    overclock_lock.addEventListener("change", event => {
+        overclock_check = document.getElementById('overclock_check');
+        if (overclock_lock.checked === true) {
+            overclock_check.disabled = false;
+        } else {
+            overclock_check.disabled = true;
+            overclock_check.checked = false;
+        }
+    });
+    var wifi_lock = document.getElementById('wifi_lock');
+    wifi_lock.addEventListener("change", event => {
+        wifi_check = document.getElementById('wifi_check');
+        if (wifi_lock.checked === true) {
+            wifi_check.disabled = false;
+        } else {
+            wifi_check.disabled = true;
+            wifi_check.checked = false;
+        }
+    });
+    var maxmonitors_lock = document.getElementById('maxmonitors_lock');
+    maxmonitors_lock.addEventListener("change", event => {
+        maxmonitors_field = document.getElementById('maxmonitors_field');
+        if (maxmonitors_lock.checked === true) {
+            maxmonitors_field.disabled = false;
+        } else {
+            maxmonitors_field.disabled = true;
+            maxmonitors_field.value = "";
+        }
+    });
+    var discvol_lock = document.getElementById('discvol_lock');
+    discvol_lock.addEventListener("change", event => {
+    discvol_field = document.getElementById('discvol_field');
+        if (discvol_lock.checked === true) {
+            discvol_field.disabled = false;
+        } else {
+            discvol_field.disabled = true;
+            discvol_field.value = "";
+        }
+    });
+    var memvol_lock = document.getElementById('memvol_lock');
+    memvol_lock.addEventListener("change", event => {
+        memvol_field = document.getElementById('memvol_field');
+        if (memvol_lock.checked === true) {
+            memvol_field.disabled = false;
+        } else {
+            memvol_field.disabled = true;
+            memvol_field.value = "";
+        }
+    });
+    var maxprice_lock = document.getElementById('maxprice_lock');
+    maxprice_lock.addEventListener("change", event => {
+        maxprice_field = document.getElementById('maxprice_field');
+        if (maxprice_lock.checked === true) {
+            maxprice_field.disabled = false;
+        } else {
+            maxprice_field.disabled = true;
+            maxprice_field.value = "";
+        }
+    });
+</script>
+{% endblock %}

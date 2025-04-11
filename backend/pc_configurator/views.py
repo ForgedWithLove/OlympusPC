@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from pc_configurator.models import Manufacturer, Processor, Motherboard, Videocard, Memory, Cooler, Case, Disc, CaseCooler, PowerSupply, DiscType, Certificate, Computer
+from pc_configurator.models import Manufacturer, Processor, Motherboard, Videocard, Memory, Cooler, Case, Disc, CaseCooler, PowerSupply, DiscType, Certificate, Computer, App
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import QueryDict
@@ -660,4 +660,45 @@ def delete_memory(request):
     current_computer.memory = None
     current_computer.memory_cnt = None
     current_computer.save(update_fields=["memory", "memory_cnt"])
+    return redirect('assemble')
+
+def select_apps(request):
+    apps = list(App.objects.all())
+    app_lists = []
+    while len(apps) > 0:
+        app_lists.append(apps[:5])
+        apps = apps[5:]
+    context = {
+        "apps": app_lists
+    }
+    return render(request, 'select_apps.html', context)
+
+def select_chars(request):
+    params = request.GET.copy()
+    selected_apps = params.getlist('id', '')
+    manufacturers = Processor.objects.all().order_by('manufacturer').values_list('manufacturer', flat=True).distinct()
+    manufacturers = list(map(lambda id: Manufacturer.objects.get(pk=id), manufacturers))
+    sockets = Processor.objects.all().order_by('socket').values_list('socket', flat=True).distinct()
+    chips = Videocard.objects.all().order_by('chip').values_list('chip', flat=True).distinct()
+    typesizes = Case.objects.all().order_by('typesize').values_list('typesize', flat=True).distinct()
+    max_monitors = Videocard.objects.order_by('-max_monitors').first().max_monitors
+    min_memory = Memory.objects.order_by('volume').first().volume
+    buf = Motherboard.objects.order_by('-mem_slots').first()
+    max_memory = buf.mem_slots * Memory.objects.filter(mem_type=buf.mem_type).order_by('-volume').first().volume
+    min_disc = Disc.objects.order_by('volume').first().volume
+    context = {
+        "manufacturers" : manufacturers,
+        "sockets" : sockets,
+        "chips" : chips,
+        "typesizes" : typesizes,
+        "max_monitors" : max_monitors,
+        "max_memory" : max_memory,
+        "min_memory" : min_memory,
+        "min_disc" : min_disc,
+        "selected_apps" : selected_apps,
+    }
+    return render(request, 'select_chars.html', context=context)
+
+def auto_configuration(request):
+    print(request.GET.copy())
     return redirect('assemble')
