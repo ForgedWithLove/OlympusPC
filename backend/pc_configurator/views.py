@@ -674,8 +674,11 @@ def select_apps(request):
     return render(request, 'select_apps.html', context)
 
 def select_chars(request):
-    params = request.GET.copy()
-    selected_apps = params.getlist('id', '')
+    params = request.GET.dict()
+    selected_apps = {}
+    for key in params.keys():
+        if "r-" in key:
+            selected_apps[int(key.replace("r-", ""))] = params[key]
     manufacturers = Processor.objects.all().order_by('manufacturer').values_list('manufacturer', flat=True).distinct()
     manufacturers = list(map(lambda id: Manufacturer.objects.get(pk=id), manufacturers))
     sockets = Processor.objects.all().order_by('socket').values_list('socket', flat=True).distinct()

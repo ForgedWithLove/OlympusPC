@@ -1,10 +1,10 @@
 {% extends "base_template.html" %}
 
 {% block content %}
-<form method="GET" action="{% url 'select_chars' %}">
+<form method="GET" action="{% url 'select_chars' %}" id="apps_form">
     {% csrf_token %}
     <div class="top_bar" style="background-color: cyan; height: 50px;">
-        <input type="submit" value="Далее">
+        <input type="submit" value="Далее" id="next_button">
     </div>
     <div style="display: flex; flex-direction: column; width: 100%;">
         {% for app_list in apps %}
@@ -24,19 +24,30 @@
                                 </div>
                             </div>
                             <div class="centered" style="width: 100%; height: calc(60% - 110px);">
-                                <div style="display: flex; align-items: center; justify-content: space-around;">
-                                    <div style="display: flex; align-items: center; position: relative; left: 24px;">
-                                        <div style="background-color: brown; height: 50px; width: 60px; border: 1px solid black; border-right: none; border-top-left-radius: 5px; border-bottom-left-radius: 5px;"></div>
-                                        <div style="background-color: brown; height: 50px; width: 65px; transform: skew(45deg); position: relative; left: -35px; border: 1px solid black; border-left: none;"></div>
+                                <div class="requirements_panel" style="display: flex; align-items: center; justify-content: space-around;">
+                                    <div style="display: flex; align-items: center; position: relative; left: 22px;">
+                                        <input type="radio" style="display: none;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" style="width: 132px; height: 52px;">
+                                            <path fill="black" d="M10,0 L82,0 L132,52 L12,52 A 12 12 90 0 1 0 40 L0,12 A 12 12 -180 0 1 12 0"></path>
+                                            <path style="transition: 0.2s;" d="M12,2 L81,2 L127,50 L12,50 A 10 10 90 0 1 2 40 L2,12 A 10 10 -180 0 1 12 2"></path>
+                                            <text x="37" y="32">MIN</text>
+                                            <rect style="stroke:#fff; fill:#fff; fill-opacity:0; stroke-opacity:0;" x="0" y="0" width="132" height="52" />
+                                        </svg>  
                                     </div>
-                                    <div style="display: flex; align-items: center; justify-content: flex-end; position: relative; left: -24px;">
-                                        <div style="background-color: brown; height: 50px; width: 65px; transform: skew(45deg); position: relative; right: -35px; border: 1px solid black; border-right: none;"></div>
-                                        <div style="background-color: brown; height: 50px; width: 60px; border: 1px solid black; border-left: none;"></div>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; position: relative; left: -22px;">
+                                        <input type="radio" style="display: none;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" style="width: 132px; height: 52px;">
+                                            <path fill="black" d="M0,0 L120,0 A 12 12 90 0 1 132 12 L132,40 A 12 12 90 0 1 120 52 L50,52 L0,0"></path>
+                                            <path style="transition: 0.2s;" d="M2,2 L120,2 A 10 10 90 0 1 130 12 L130,40 A 10 10 90 0 1 120 50 L51,50 L5,2"></path>
+                                            <text x="67" y="32">REC</text>
+                                            <rect style="stroke:#fff; fill:#fff; fill-opacity:0; stroke-opacity:0;" x="0" y="0" width="132" height="52" />
+                                        </svg>
                                     </div>
                                 </div>
+                                <input type="hidden" id="r-{{app.id}}">
                             </div>
                             <div style="width: 100%; height: 58px; display: flex; align-items: center; justify-content: flex-end; position: relative; bottom: 16px; right: 10px;">
-                                <input type="checkbox" class="app_checkbox" name="id" value="{{ app.id }}">
+                                <input type="checkbox" class="app_checkbox">
                             </div>
                         </div>
                     </div>
@@ -46,19 +57,116 @@
     </div>
 </form>
 <script>
+    function setNBState (state) {
+        document.getElementById('next_button').disabled = !state;
+    }
+
+    function anyAppsChecked () {
+        var checkboxes = document.querySelectorAll('.app_checkbox');
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (appChecked(checkboxes[i].parentElement.parentElement.children[2].children[0])) {
+                return true;
+            }
+        }
+        return false
+    }
+
+    function setName (panel) {
+        panel.parentElement.children[1].name = panel.parentElement.children[1].id;
+    }
+
+    function removeName (panel) {
+        panel.parentElement.children[1].name = "";
+    }
+
+    function appChecked (panel) {
+        return panel.parentElement.parentElement.children[3].children[0].checked;
+    }
+
+    function minChecked (panel) {
+        return panel.children[0].children[0].checked;
+    }
+
+    function recChecked (panel) {
+        return panel.children[1].children[0].checked;
+    }
+
+    function styleEnabled (svg) {
+        svg.children[1].style.fill = 'rgba(0,255,3,0.8)';
+        svg.children[2].style.fill = 'black';
+    }
+
+    function styleDisabled (svg) {
+        svg.children[1].style.fill = 'rgba(52,52,52,0.8)';
+        svg.children[2].style.fill = 'rgba(255,255,255,0.7)';
+    }
+
+    function syncState (panel) {
+        if (appChecked(panel)) {
+            panel.parentElement.parentElement.style.background = 'linear-gradient(45deg, rgba(174,255,0,0.5) 0%, rgba(178,232,40,0.5) 35%, rgba(3,255,0,0.5) 100%)';
+            setName(panel);
+        } else {
+            panel.parentElement.parentElement.style.background = "transparent";
+            removeName(panel);
+        }
+        setNBState(anyAppsChecked());
+        if (minChecked(panel)) {
+            styleEnabled(panel.children[0].children[1]);
+            styleDisabled(panel.children[1].children[1]);
+        } else if (recChecked(panel)) {
+            styleEnabled(panel.children[1].children[1]);
+            styleDisabled(panel.children[0].children[1]);
+        } else {
+            styleDisabled(panel.children[0].children[1]);
+            styleDisabled(panel.children[1].children[1]);
+        }
+    }
+
+    function selectMin (panel) {
+        panel.children[1].children[0].checked = false;
+        panel.children[0].children[0].checked = true;
+        panel.parentElement.children[1].value = "min";
+        syncState(panel);
+    }
+
+    function selectRec (panel) {
+        panel.children[0].children[0].checked = false;
+        panel.children[1].children[0].checked = true;
+        panel.parentElement.children[1].value = "rec";
+        syncState(panel);
+    }
+
+    function selectNone (panel) {
+        panel.children[0].children[0].checked = false;
+        panel.children[1].children[0].checked = false;
+        panel.parentElement.children[1].value = "";
+        syncState(panel);
+    }
+
     var checkboxes = document.querySelectorAll('.app_checkbox');
     for (let i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked === true) {
-            checkboxes[i].parentElement.parentElement.style.background = 'linear-gradient(45deg, rgba(174,255,0,0.5) 0%, rgba(178,232,40,0.5) 35%, rgba(3,255,0,0.5) 100%)';
+        if (appChecked(checkboxes[i].parentElement.parentElement.children[2].children[0])) {
+            selectMin(checkboxes[i].parentElement.parentElement.children[2].children[0]);
         }
-    };
-    for (let i = 0; i < checkboxes.length; i++) {
         checkboxes[i].addEventListener("change", event => {
-            x = checkboxes[i].parentElement.parentElement;
-            if (checkboxes[i].checked === true) {
-                x.style.background = 'linear-gradient(45deg, rgba(174,255,0,0.5) 0%, rgba(178,232,40,0.5) 35%, rgba(3,255,0,0.5) 100%)';
+            if (appChecked(checkboxes[i].parentElement.parentElement.children[2].children[0])) {
+                selectMin(checkboxes[i].parentElement.parentElement.children[2].children[0]);
             } else {
-                x.style.background = 'transparent';
+                selectNone(checkboxes[i].parentElement.parentElement.children[2].children[0]);
+            }
+        });
+    }
+    var panels = document.querySelectorAll('.requirements_panel');
+    for (let i = 0; i < panels.length; i++) {
+        syncState(panels[i]);
+        panels[i].children[0].children[1].children[3].addEventListener("click", event => {
+            if (appChecked(panels[i])) {
+                selectMin(panels[i]);
+            }
+        });
+        panels[i].children[1].children[1].children[3].addEventListener("click", event => {
+            if (appChecked(panels[i])) {
+                selectRec(panels[i]);
             }
         });
     }
