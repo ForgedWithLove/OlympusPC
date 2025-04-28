@@ -10,7 +10,8 @@ from django.contrib import messages
 from guest_user.decorators import allow_guest_user
 import json
 from guest_user.functions import is_guest_user
-from pc_configurator.functions import assembly_is_valid, get_error_desciption
+from pc_configurator.functions import assembly_is_valid, get_error_desciption, main_assembler
+import ast
 
 def welcome(request):
     return render(
@@ -703,5 +704,195 @@ def select_chars(request):
     return render(request, 'select_chars.html', context=context)
 
 def auto_configuration(request):
-    print(request.GET.copy())
+    #Формируем полные списки комплектующих
+    processor_qs = Processor.objects.all()
+    motherboard_qs = Motherboard.objects.all()
+    videocard_qs = Videocard.objects.all()
+    memory_qs = Memory.objects.all()
+    cooler_qs = Cooler.objects.all()
+    case_qs = Case.objects.all()
+    disc_qs = Disc.objects.all()
+    casecooler_qs = CaseCooler.objects.all()
+    powersupply_qs = PowerSupply.objects.all()
+    #Применяем ограничения параметров к спискам
+    params = request.GET.copy()
+    any_volume = 0
+    ssd_volume = 0
+    min_ram_volume = 0
+    psu_multiplier = 1
+    cooler_multiplier = 1
+    buf_cpu_rating = 0
+    buf_cpu_cores = 0
+    buf_cpu_freq = 0
+    buf_gpu_rating = 0
+    buf_gpu_volume = 0
+    selected_apps = ast.literal_eval(params['selected_apps'])
+    for id in selected_apps.keys():
+        app = App.objects.get(pk=id)
+        if selected_apps[id] == 'min':
+            buf_cpu_rating = app.min_cpu_rating if app.min_cpu_rating is not None and buf_cpu_rating < app.min_cpu_rating else buf_cpu_rating
+            buf_cpu_cores = app.min_cpu_cores if app.min_cpu_cores is not None and buf_cpu_cores < app.min_cpu_cores else buf_cpu_cores
+            buf_cpu_freq = app.min_cpu_freq if app.min_cpu_freq is not None and buf_cpu_freq < app.min_cpu_freq else buf_cpu_freq
+            buf_gpu_rating = app.min_gpu_rating if app.min_gpu_rating is not None and buf_gpu_rating < app.min_gpu_rating else buf_gpu_rating
+            buf_gpu_volume = app.min_gpu_volume if app.min_gpu_volume is not None and buf_gpu_volume < app.min_gpu_volume else buf_gpu_volume
+            min_ram_volume = app.min_ram_volume if app.min_ram_volume is not None and min_ram_volume < app.min_ram_volume else min_ram_volume
+            if app.need_ssd:
+                ssd_volume += app.disc_space
+            any_volume += app.disc_space
+        elif selected_apps[id] == 'rec':
+            buf_cpu_rating = app.rec_cpu_rating if app.rec_cpu_rating is not None and buf_cpu_rating < app.rec_cpu_rating else buf_cpu_rating
+            buf_cpu_cores = app.rec_cpu_cores if app.rec_cpu_cores is not None and buf_cpu_cores < app.rec_cpu_cores else buf_cpu_cores
+            buf_cpu_freq = app.rec_cpu_freq if app.rec_cpu_freq is not None and buf_cpu_freq < app.rec_cpu_freq else buf_cpu_freq
+            buf_gpu_rating = app.rec_gpu_rating if app.rec_gpu_rating is not None and buf_gpu_rating < app.rec_gpu_rating else buf_gpu_rating
+            buf_gpu_volume = app.rec_gpu_volume if app.rec_gpu_volume is not None and buf_gpu_volume < app.rec_gpu_volume else buf_gpu_volume
+            min_ram_volume = app.rec_ram_volume if app.rec_ram_volume is not None and min_ram_volume < app.rec_ram_volume else min_ram_volume
+            if app.rec_ssd:
+                ssd_volume += app.disc_space
+            else:
+                any_volume += app.disc_space
+        else:
+            raise ValueError('Incorrect type of app requirements.')
+    processor_qs = processor_qs.filter(rating__gte = buf_cpu_rating).filter(cores__gte = buf_cpu_cores).filter(frequency__gte = buf_cpu_freq)
+    videocard_qs = videocard_qs.filter(rating__gte = buf_gpu_rating).filter(mem_volume__gte = buf_gpu_volume)
+    if 'manufacturer' in params.keys():
+        manufact = Manufacturer.objects.get(pk=int(params['manufacturer']))
+        processor_qs = processor_qs.filter(manufacturer = manufact)
+    if 'socket' in params.keys():
+        processor_qs = processor_qs.filter(socket = params['socket'])
+        motherboard_qs = motherboard_qs.filter(socket = params['socket'])
+        cooler_qs = cooler_qs.filter(sockets__contains = [params['socket']])
+    if 'nodiscrete' in params.keys():
+        #---------------------------------------------------------------
+        pass
+    if 'videochip' in params.keys():
+        videocard_qs = videocard_qs.filter(chip = params['videochip'])
+    if 'maxmonitors' in params.keys():
+        videocard_qs = videocard_qs.filter(max_monitors__gte = int(params['maxmonitors']))
+    if 'discvol' in params.keys():
+        any_volume = params['discvol'] if params['discvol'] > any_volume else any_volume
+    if 'ssdonly' in params.keys():
+        ssd_types = DiscType.objects.filter(name__contains = 'SSD')
+        query = Q()
+        for type_ in ssd_types:
+            query = query | Q(type = type_)
+        disc_qs = disc_qs.filter(query)
+        ssd_volume = any_volume
+    if 'memvol' in params.keys():
+        min_ram_volume = max(min_ram_volume, int(params['memvol']))
+    if 'typesize' in params.keys():
+        case_qs = case_qs.filter(typesize = params['typesize'])
+    if 'overclock' in params.keys():
+        processor_qs = processor_qs.filter(unlocked = True)
+        motherboard_qs = motherboard_qs.filter(Q(chipset__contains = 'Z') | Q(chipset__contains = 'X') | (Q(chipset__contains = 'B') & Q(manufacturer = Manufacturer.objects.get(name = 'AMD'))))
+        cooler_multiplier += 0.3
+        psu_multiplier += 0.15
+    if 'wifi' in params.keys():
+        motherboard_qs = motherboard_qs.filter(wifi_ver__isnull = False).filter(bluetooth_ver__isnull = False)
+    if 'maxprice' in params.keys():
+        #---------------------------------------------------------------
+        pass    
+    if (len(processor_qs) == 0 or 
+        len(motherboard_qs) == 0 or
+        len(videocard_qs) == 0 or
+        len(memory_qs) == 0 or
+        len(cooler_qs) == 0 or
+        len(case_qs) == 0 or
+        len(disc_qs) == 0 or
+        len(casecooler_qs) == 0 or
+        len(powersupply_qs) == 0
+    ):
+        #----------------------------------------------------------------------------
+        print('Невозможно автоматически создать сборку с указанными характеристиками.')
+        return redirect('assemble')
+
+    buf = processor_qs.order_by('socket').values_list('socket', flat=True).distinct()
+    query = Q()
+    for socket in buf:
+        query = query | Q(socket = socket)
+    motherboard_qs = motherboard_qs.filter(query)
+    query = Q()
+    for socket in buf:
+        query = query | Q(sockets__contains = [socket])
+    cooler_qs = cooler_qs.filter(query)
+
+    buf = motherboard_qs.order_by('socket').values_list('socket', flat=True).distinct()
+    query = Q()
+    for socket in buf:
+        query = query | Q(socket = socket)
+    processor_qs = processor_qs.filter(query)
+    query = Q()
+    for socket in buf:
+        query = query | Q(sockets__contains = [socket])
+    cooler_qs = cooler_qs.filter(query)
+
+    buf = cooler_qs.order_by('-power').first().power
+    processor_qs = processor_qs.filter(tdp__lte = buf*10/11)
+
+    buf = motherboard_qs.order_by('formfactor').values_list('formfactor', flat=True).distinct()
+    query = Q()
+    for ff in buf:
+        query = query | Q(mb_ffs__contains = [ff])
+    case_qs = case_qs.filter(query)
+
+    buf = motherboard_qs.order_by('mem_type').values_list('mem_type', flat=True).distinct()
+    query = Q()
+    for memt in buf:
+        query = query | Q(mem_type = memt)
+    memory_qs = memory_qs.filter(query)
+
+    buf = memory_qs.order_by('mem_type').values_list('mem_type', flat=True).distinct()
+    query = Q()
+    for memt in buf:
+        query = query | Q(mem_type = memt)
+    motherboard_qs = motherboard_qs.filter(query)
+
+    buf = case_qs.order_by('-max_gpu_length').first().max_gpu_length
+    videocard_qs = videocard_qs.filter(length__lte = buf)
+
+    buf = case_qs.order_by('-max_cooler_height').first().max_cooler_height
+    cooler_qs = cooler_qs.filter(height__lte = buf)
+
+    buf = powersupply_qs.order_by('typesize').values_list('typesize', flat=True).distinct()
+    query = Q()
+    for tpsz in buf:
+        query = query | Q(psu_typesize__contains = [tpsz])
+    case_qs = case_qs.filter(query)
+
+    if (len(processor_qs) == 0 or 
+        len(motherboard_qs) == 0 or
+        len(videocard_qs) == 0 or
+        len(memory_qs) == 0 or
+        len(cooler_qs) == 0 or
+        len(case_qs) == 0 or
+        len(disc_qs) == 0 or
+        len(casecooler_qs) == 0 or
+        len(powersupply_qs) == 0
+    ):
+        #----------------------------------------------------------------------------
+        print('Невозможно автоматически создать сборку с указанными характеристиками.')
+        return redirect('assemble')
+
+    main_assembler(
+        {
+            'processor' : processor_qs.filter(price__gt = 0),
+            'motherboard' : motherboard_qs.filter(price__gt = 0),
+            'videocard' : videocard_qs.filter(price__gt = 0),
+            'memory' : memory_qs.filter(price__gt = 0),
+            'cooler' : cooler_qs.filter(price__gt = 0),
+            'case' : case_qs.filter(price__gt = 0),
+            'disc' : disc_qs.filter(price__gt = 0),
+            'casecooler' : casecooler_qs.filter(price__gt = 0),
+            'powersupply' : powersupply_qs.filter(price__gt = 0)
+        },
+        {
+            'any_volume' : any_volume,
+            'ssd_volume' : ssd_volume,
+            'min_ram_volume' : min_ram_volume,
+            'psu_mult' : psu_multiplier,
+            'cooler_mult' : cooler_multiplier
+        }
+    )
+    
     return redirect('assemble')
+
+    

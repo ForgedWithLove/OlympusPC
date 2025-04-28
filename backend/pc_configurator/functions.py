@@ -1,6 +1,10 @@
 import json
 import math
-from pc_configurator.models import Disc
+import sys
+from copy import deepcopy
+from random import randrange, choice
+from pc_configurator.models import Disc, Processor, Videocard, DiscType
+from django.db.models import Q, Avg, F
 
 #Возвращает словарь вида: интерфейс(ключ) - количество дисков(значение)
 def count_discs_by_interface(discs):
@@ -391,3 +395,340 @@ def assembly_is_valid(assembly):
             return [True, []]
     else:
         return [False, []]
+
+def check_qs(queryset):
+    if len(queryset) == 0:
+        raise ValueError("Can not assemble pc with entered chars.")
+    else:
+        return
+
+def parse_combination(combination_str):
+    comb_list = list(map(lambda x: int(x), combination_str.split('/')))
+    combination = {}
+    combination['processor'] = Processor.objects.get(pk=comb_list[0])
+    combination['videocard'] = Videocard.objects.get(pk=comb_list[1])
+    return combination
+
+def slice_by_price(combs, combinations, count):
+    combs_list = deepcopy(combs)
+    for comb in combs_list.keys():
+        combs_list[comb] = combinations[comb]['price']
+    combs_list = dict(sorted(combs_list.items(), key=lambda item: item[1]))
+    combs_list = dict(list(combs_list.items())[:count])
+    return combs_list
+
+def slice_by_price_base(combs, combinations, max_base):
+    combs_list = deepcopy(combs)
+    for comb in combs_list.keys():
+        combs_list[comb] = combinations[comb]['price']
+    combs_list = dict(sorted(combs_list.items(), key=lambda item: item[1]))
+    keys = list(combs_list.keys())
+    max_price = combs_list[keys[0]] * max_base
+    max_inc = len(keys) - 1
+    inc = -1
+    flag = False
+    while not flag and inc < max_inc:
+        inc += 1
+        if combs_list[keys[inc]] > max_price:
+            flag = True
+    if inc == max_inc:
+        combs_list = dict(list(combs_list.items())[:])
+    else:
+        combs_list = dict(list(combs_list.items())[:inc])
+    return combs_list
+
+def slice_by_rating(combs, combinations, count):
+    combs_list = deepcopy(combs)
+    for comb in combs_list.keys():
+        combs_list[comb] = combinations[comb]['rating']
+    combs_list = dict(sorted(combs_list.items(), key=lambda item: item[1], reverse=True))
+    combs_list = dict(list(combs_list.items())[:count])
+    return combs_list
+
+def slice_by_rtp(combs, combinations, count):
+    combs_list = deepcopy(combs)
+    for comb in combs_list.keys():
+        combs_list[comb] = combinations[comb]['rtp']
+    combs_list = dict(sorted(combs_list.items(), key=lambda item: item[1], reverse=True))
+    combs_list = dict(list(combs_list.items())[:count])
+    return combs_list
+
+def slice_by_rtp_final(combs, combinations):
+    combs_list = deepcopy(combs)
+    for comb in combs_list.keys():
+        combs_list[comb] = combinations[comb]['rtp']
+    combs_list = dict(sorted(combs_list.items(), key=lambda item: item[1], reverse=True))
+    keys = list(combs_list.keys())
+    min_rtp = combs_list[keys[0]] * 0.8
+    max_inc = len(keys) - 1
+    inc = -1
+    flag = False
+    while not flag and inc < max_inc:
+        inc += 1
+        if combs_list[keys[inc]] < min_rtp:
+            flag = True
+    if inc == max_inc:
+        combs_list = dict(list(combs_list.items())[:])
+    else:
+        combs_list = dict(list(combs_list.items())[:inc])
+    return combs_list
+
+def cheap_combinations(combs, combinations):
+    combs_list = deepcopy(combs)
+    combs_list = slice_by_price_base(combs_list, combinations, 1.25)
+    while len(combs_list) > 20:
+        combs_list = slice_by_rtp(combs_list, combinations, max(40, round(len(combs_list) / 4)))
+        combs_list = slice_by_rating(combs_list, combinations, max(20, round(len(combs_list) / 2)))
+    combs_list = slice_by_price(combs_list, combinations, 10)
+    combs_list = slice_by_rtp_final(combs_list, combinations)
+    return combs_list
+
+def optimal_combinations(combs, combinations):
+    combs_list = deepcopy(combs)
+    combs_list = slice_by_price_base(combs_list, combinations, 1.5)
+    while len(combs_list) > 20:
+        combs_list = slice_by_rating(combs_list, combinations, max(40, round(len(combs_list) / 3)))
+        combs_list = slice_by_rtp(combs_list, combinations, max(20, round(len(combs_list) / 3)))
+    combs_list = slice_by_rating(combs_list, combinations, 10)
+    combs_list = slice_by_rtp_final(combs_list, combinations)
+    return combs_list
+
+def performant_combinations(combs, combinations):
+    combs_list = deepcopy(combs)
+    combs_list = slice_by_price_base(combs_list, combinations, 2)
+    while len(combs_list) > 20:
+        combs_list = slice_by_rtp(combs_list, combinations, max(40, round(len(combs_list) / 2)))
+        combs_list = slice_by_rating(combs_list, combinations, max(20, round(len(combs_list) / 4)))
+    combs_list = slice_by_price(combs_list, combinations, 10)
+    combs_list = slice_by_rtp_final(combs_list, combinations)
+    return combs_list
+
+def best_combinations(combs, combinations):
+    combs_list = deepcopy(combs)
+    return {'cheap' : list(cheap_combinations(combs_list, combinations).keys())[0],
+            'optimal' : list(optimal_combinations(combs_list, combinations).keys())[0],
+            'performant' : list(performant_combinations(combs_list, combinations).keys())[0]}
+
+def rand_combinations(combs, combinations):
+    combs_list = deepcopy(combs)
+    cheap = list(cheap_combinations(combs_list, combinations).keys())
+    optimal = list(optimal_combinations(combs_list, combinations).keys())
+    performant = list(performant_combinations(combs_list, combinations).keys())
+    return {'cheap' : cheap[randrange(0, len(cheap))],
+            'optimal' : optimal[randrange(0, len(optimal))],
+            'performant' : performant[randrange(0, len(performant))]}
+
+def find_combinations(cpu_qs, gpu_qs, random = False):
+    combinations = {}
+    for cpu in cpu_qs:
+        for gpu in gpu_qs:
+            ratio = cpu.rating / gpu.rating
+            if ratio < 1.81 and ratio > 0.4:
+                rating = cpu.rating + gpu.rating
+                price = cpu.price + gpu.price
+                chars = {'ratio' : ratio, 'price' : price, 'rating' : rating}
+                combinations[f'{cpu.id}/{gpu.id}'] = chars
+    min_price = sys.maxsize
+    max_price = 0
+    min_rate = sys.maxsize
+    max_rate = 0
+    for comb in combinations.values():
+        if comb['price'] > max_price:
+            max_price = comb['price']
+        if comb['price'] < min_price:
+            min_price = comb['price']
+        if comb['rating'] > max_rate:
+            max_rate = comb['rating']
+        if comb['rating'] < min_rate:
+            min_rate = comb['rating']
+    k = (max_price / min_price) / (max_rate / min_rate)
+    for comb in combinations.keys():
+        combinations[comb]['rtp'] = (min_rate + (combinations[comb]['rating'] - min_rate) * k) / combinations[comb]['price']
+    combs = {}
+    for comb in combinations.keys():
+        combs[comb] = 0
+    if random:
+        best = rand_combinations(combs, combinations)
+    else:
+        best = best_combinations(combs, combinations)
+    for key in best.keys():
+        best[key] = parse_combination(best[key])
+    return best
+
+def find_necessaries(combination, querysets, selected_params, mode, random = False):
+    selected_cpu = combination['processor']
+    selected_gpu = combination['videocard']
+    motherboard_qs = querysets['motherboard']
+    memory_qs = querysets['memory']
+    cooler_qs = querysets['cooler']
+    case_qs = querysets['case']
+    disc_qs = querysets['disc']
+    casecooler_qs = querysets['casecooler']
+    powersupply_qs = querysets['powersupply']
+    min_ram_vol = selected_params['min_ram_volume']
+    cooler_mult = selected_params['cooler_mult']
+    any_volume = selected_params['any_volume']
+    ssd_volume = selected_params['ssd_volume']
+    motherboard_qs = motherboard_qs.filter(socket = selected_cpu.socket).filter(pciex16_ver__gte = selected_gpu.pciex16_ver)
+    mem_types = motherboard_qs.order_by('mem_type').values_list('mem_type', flat=True).distinct()
+    max_vol_per_type = {}
+    for mem_type in mem_types:
+        volume = {}
+        max_module_vol = memory_qs.filter(mem_type = mem_type).order_by('-volume').first().volume
+        max_ram_slots = motherboard_qs.filter(mem_type = mem_type).order_by('-mem_slots').first().mem_slots
+        volume['max_volume'] = max_module_vol * max_ram_slots
+        volume['needed_slots'] = max_ram_slots
+        max_vol_per_type[mem_type] = volume
+    mb_filter = Q()
+    mem_filter = Q()
+    for mem_type in max_vol_per_type.keys():
+        if max_vol_per_type[mem_type]['max_volume'] >= min_ram_vol:
+            slots = 1
+            flag = False
+            while slots <= max_vol_per_type[mem_type]['needed_slots'] and not flag:
+                if max_vol_per_type[mem_type]['max_volume'] / max_vol_per_type[mem_type]['needed_slots'] * slots >= min_ram_vol:
+                    flag = True
+                else:
+                    slots *= 2
+            mb_filter = mb_filter | (Q(mem_type = mem_type) & Q(mem_slots__gte = slots))
+            mem_filter = mem_filter | Q(mem_type = mem_type)
+    if len(mb_filter) == 0 or len(mem_filter) == 0:
+        raise ValueError("Can not assemble pc with entered chars.")
+    motherboard_qs = motherboard_qs.filter(mb_filter)
+    memory_qs = memory_qs.filter(mem_filter)
+    min_mb_price = motherboard_qs.order_by('price').values_list('price', flat=True)[0]
+    if mode == 'cheap':
+        motherboard_qs = motherboard_qs.filter(price__lte = min_mb_price * 1.25)
+    elif mode == 'optimal':
+        motherboard_qs = motherboard_qs.filter(price__lte = min_mb_price * 1.5)
+    elif mode == 'performant':
+        motherboard_qs = motherboard_qs.filter(price__lte = min_mb_price * 2)
+    else:
+        raise ValueError('Mode does not exist.')
+    #Выборка материнских плат по метрике !!!
+    pks = list(motherboard_qs.values_list('id', flat=True))
+    random_pk = choice(pks)
+    selected_mb = motherboard_qs.get(pk=random_pk)
+    combination['motherboard'] = selected_mb
+    memory_qs = memory_qs.filter(mem_type = selected_mb.mem_type)
+    module_volumes = memory_qs.order_by('volume').values_list('volume', flat=True).distinct()
+    max_module_vol = max(module_volumes)
+    mod_cnt = max_vol_per_type[mem_type]['needed_slots']
+    vol_cnt_combs = {}
+    while mod_cnt >= math.ceil(min_ram_vol / max_module_vol):
+        temp_vol = round(min_ram_vol / mod_cnt)
+        for vol in module_volumes:
+            if vol >= temp_vol:
+                vol_cnt_combs[mod_cnt] = vol
+                break
+        if vol_cnt_combs[mod_cnt] == max_module_vol:
+            break
+        else:
+            mod_cnt //= 2
+    best_count = 0
+    if mode == 'cheap':
+        avg_price = sys.maxsize
+        for mod_count_key in vol_cnt_combs.keys():
+            temp_avg_price = memory_qs.filter(volume = vol_cnt_combs[mod_count_key]).aggregate(Avg("price", default=0))['price__avg'] * mod_count_key
+            if temp_avg_price < avg_price:
+                avg_price = temp_avg_price
+                best_count = mod_count_key
+    elif mode == 'optimal' or mode == 'performant':
+        buf = max_vol_per_type[mem_type]['needed_slots'] // 2
+        best_count = buf if buf in vol_cnt_combs.keys() else min(vol_cnt_combs.keys())
+    combination['memory_cnt'] = best_count
+    memory_qs = memory_qs.filter(volume = vol_cnt_combs[best_count])
+    if mode == 'cheap':
+        memory_qs = memory_qs.filter(price__lte = memory_qs.order_by('price').first().price + (memory_qs.order_by('-price').first().price - memory_qs.order_by('price').first().price) / 4)
+    elif mode == 'optimal':
+        memory_qs = memory_qs.filter(price__lte = memory_qs.order_by('price').first().price + (memory_qs.order_by('-price').first().price - memory_qs.order_by('price').first().price) / 2)
+    min_bandwidth = memory_qs.order_by('bandwidth').first().bandwidth
+    max_bandwidth = memory_qs.order_by('-bandwidth').first().bandwidth
+    min_price = memory_qs.order_by('price').first().price
+    max_price = memory_qs.order_by('-price').first().price
+    k = (max_price / min_price) / (max_bandwidth / min_bandwidth)
+    memory_qs = memory_qs.annotate(metrics=(min_bandwidth + (F('bandwidth') - min_bandwidth) * k) / F('price'))
+    if mode == 'cheap':
+        while len(memory_qs) > 20:
+            memory_qs = sorted(memory_qs, key=lambda obj: obj.metrics, reverse=True)[:max(40, round(len(memory_qs) / 4))]
+            memory_qs = sorted(memory_qs, key=lambda obj: obj.bandwidth, reverse=True)[:max(20, round(len(memory_qs) / 2))]
+        memory_qs = sorted(memory_qs, key=lambda obj: obj.price)[:10]
+    elif mode == 'optimal':
+        while len(memory_qs) > 20:
+            memory_qs = sorted(memory_qs, key=lambda obj: obj.bandwidth, reverse=True)[:max(40, round(len(memory_qs) / 3))]
+            memory_qs = sorted(memory_qs, key=lambda obj: obj.metrics, reverse=True)[:max(20, round(len(memory_qs) / 3))]
+        memory_qs = sorted(memory_qs, key=lambda obj: obj.price)[:10]
+    else:
+        while len(memory_qs) > 20:
+            memory_qs = sorted(memory_qs, key=lambda obj: obj.bandwidth, reverse=True)[:max(40, round(len(memory_qs) / 4))]
+            memory_qs = sorted(memory_qs, key=lambda obj: obj.metrics, reverse=True)[:max(20, round(len(memory_qs) / 2))]
+        memory_qs = sorted(memory_qs, key=lambda obj: [obj.bandwidth, -obj.latency], reverse=True)[:10]
+    if random:
+        combination['memory'] = choice(memory_qs)
+    else:
+        combination['memory'] = memory_qs[0]
+    cooler_qs = cooler_qs.filter(sockets__contains = [selected_cpu.socket]).filter(power__gte = selected_cpu.tdp * 1.1 * cooler_mult)
+    check_qs(cooler_qs)
+    if mode == 'cheap':
+        cooler_qs = cooler_qs.filter(price__lte = cooler_qs.order_by('price').first().price + (cooler_qs.order_by('-price').first().price - cooler_qs.order_by('price').first().price) / 4)
+    elif mode == 'optimal':
+        cooler_qs = cooler_qs.filter(price__lte = cooler_qs.order_by('price').first().price + (cooler_qs.order_by('-price').first().price - cooler_qs.order_by('price').first().price) / 2)
+    min_power = cooler_qs.order_by('power').first().power
+    max_power = cooler_qs.order_by('-power').first().power
+    min_price = cooler_qs.order_by('price').first().price
+    max_price = cooler_qs.order_by('-price').first().price
+    k = (max_price / min_price) / (max_power / min_power)
+    cooler_qs = cooler_qs.annotate(metrics=(min_power + (F('power') - min_power) * k) / F('price'))
+    if mode == 'cheap':
+        while len(cooler_qs) > 20:
+            cooler_qs = sorted(cooler_qs, key=lambda obj: obj.metrics, reverse=True)[:max(40, round(len(cooler_qs) / 4))]
+            cooler_qs = sorted(cooler_qs, key=lambda obj: obj.power, reverse=True)[:max(20, round(len(cooler_qs) / 2))]
+        cooler_qs = sorted(cooler_qs, key=lambda obj: obj.price)[:10]
+    elif mode == 'optimal':
+        while len(cooler_qs) > 20:
+            cooler_qs = sorted(cooler_qs, key=lambda obj: obj.power, reverse=True)[:max(40, round(len(cooler_qs) / 3))]
+            cooler_qs = sorted(cooler_qs, key=lambda obj: obj.metrics, reverse=True)[:max(20, round(len(cooler_qs) / 3))]
+        cooler_qs = sorted(cooler_qs, key=lambda obj: obj.price)[:10]
+    else:
+        while len(cooler_qs) > 20:
+            cooler_qs = sorted(cooler_qs, key=lambda obj: obj.power, reverse=True)[:max(40, round(len(cooler_qs) / 4))]
+            cooler_qs = sorted(cooler_qs, key=lambda obj: obj.metrics, reverse=True)[:max(20, round(len(cooler_qs) / 2))]
+        cooler_qs = sorted(cooler_qs, key=lambda obj: obj.power, reverse=True)[:10]
+        cooler_qs = sorted(cooler_qs, key=lambda obj: obj.metrics, reverse=True)
+    if random:
+        combination['cooler'] = choice(cooler_qs)
+    else:
+        combination['cooler'] = cooler_qs[0]
+    print(f'M.2: {selected_mb.m2_slots}')
+    print(f'SATA: {selected_mb.sata_ports}')
+    sys_ssd = disc_qs.filter(
+        Q(type = DiscType.objects.get(name = 'M.2 SSD')) &
+        Q(volume__gte = 256) &
+        Q(volume__lte = 1024)
+    )
+    check_qs(sys_ssd)
+    if mode == 'cheap':
+        sys_ssd = sys_ssd.filter(price__lte = sys_ssd.order_by('price').first().price + (sys_ssd.order_by('-price').first().price - sys_ssd.order_by('price').first().price) / 4)
+    elif mode == 'optimal':
+        sys_ssd = sys_ssd.filter(price__lte = sys_ssd.order_by('price').first().price + (sys_ssd.order_by('-price').first().price - sys_ssd.order_by('price').first().price) / 2)
+    sys_ssd = sys_ssd.annotate(metrics=(F('rd_speed')) * F('volume') / F('price')).order_by('-metrics')[:10]
+    if random:
+        selected_sys_disc = choice(sys_ssd)
+    else:
+        selected_sys_disc = sys_ssd.first()
+
+def main_assembler(querysets, selected_params, random = False):
+    processor_qs = querysets['processor']
+    videocard_qs = querysets['videocard']
+    combinations = find_combinations(processor_qs, videocard_qs, random)
+    cheap_global = combinations['cheap']
+    optimal_global = combinations['optimal']
+    performant_global = combinations['performant']
+    print('Cheap')
+    find_necessaries(cheap_global, querysets, selected_params, 'cheap', random)
+    #print('\nOptimal')
+    #find_necessaries(optimal_global, querysets, selected_params, 'optimal', random)
+    #print('\nPerformant')
+    #find_necessaries(performant_global, querysets, selected_params, 'performant', random)
+    
+    return
