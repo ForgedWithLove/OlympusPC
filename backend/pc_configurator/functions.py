@@ -662,7 +662,7 @@ def find_necessaries(combination, querysets, selected_params, mode, random = Fal
         raise ValueError("Can not assemble pc with entered chars.")
     motherboard_qs = motherboard_qs.filter(mb_filter)
     memory_qs = memory_qs.filter(mem_filter)
-    min_mb_price = motherboard_qs.order_by('price').values_list('price', flat=True)[0]
+    min_mb_price = motherboard_qs.order_by('price').first().price
     if mode == 'cheap':
         motherboard_qs = motherboard_qs.filter(price__lte = min_mb_price * 1.25)
     elif mode == 'optimal':
@@ -672,9 +672,18 @@ def find_necessaries(combination, querysets, selected_params, mode, random = Fal
     else:
         raise ValueError('Mode does not exist.')
     #Выборка материнских плат по метрике !!!
-    pks = list(motherboard_qs.values_list('id', flat=True))
-    random_pk = choice(pks)
-    selected_mb = motherboard_qs.get(pk=random_pk)
+
+    mb_list = []
+    for mb in motherboard_qs:
+        data = {
+            'obj' : mb,
+            'price' : mb.price,
+            'metrics' : round(pow(int(mb.chipset[-2:-1]), 2) * int(mb.chipset[:-2][1:]) * int(mb.mem_type[-1:]) / mb.price * 10000),
+        }
+        mb_list.append(data)
+    mb_list = sorted(mb_list, key=lambda d: d['metrics'], reverse=True)[:10]
+
+    selected_mb = choice(mb_list)['obj']
     combination['motherboard'] = selected_mb
     memory_qs = memory_qs.filter(mem_type = selected_mb.mem_type)
     module_volumes = memory_qs.order_by('volume').values_list('volume', flat=True).distinct()

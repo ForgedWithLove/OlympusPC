@@ -972,9 +972,10 @@ def auto_showcase(request):
 def auto_configuration(request):
     params = ast.literal_eval(request.GET['assembly'])
     deactivate_active(request.user)
-    try:
-        next_number = int(Computer.objects.filter(user=request.user, name__contains='Сборка №').order_by('-created').first().name.replace('Сборка №', '')) + 1
-    except Computer.DoesNotExist:
+    next_number = Computer.objects.filter(user=request.user, name__contains='Сборка №').order_by('-created').first()
+    if next_number is not None:
+        next_number = int(next_number.name.replace('Сборка №', '')) + 1
+    else:
         next_number = 1
     generated_computer = Computer(
         user = request.user,
@@ -1082,7 +1083,7 @@ def assembly_analysis(request):
             recommended = {}
             minimal['processor'] = current_computer.processor.rating >= if_none(app.min_cpu_rating, 0) and current_computer.processor.cores >= if_none(app.min_cpu_cores, 0) and current_computer.processor.frequency >= if_none(app.min_cpu_freq, 0)
             minimal['videocard'] = current_computer.videocard.rating >= if_none(app.min_gpu_rating, 0) and current_computer.videocard.mem_volume >= if_none(app.min_gpu_volume, 0)
-            minimal['memory'] = current_computer.memory.volume >= if_none(app.min_ram_volume, 0)
+            minimal['memory'] = current_computer.memory.volume * current_computer.memory_cnt >= if_none(app.min_ram_volume, 0)
             sata_ssd = DiscType.objects.get(name='2.5" SSD')
             m2_ssd = DiscType.objects.get(name="M.2 SSD")
             flag = False
@@ -1095,7 +1096,7 @@ def assembly_analysis(request):
             minimal['summary'] = minimal['processor'] and minimal['videocard'] and minimal['memory'] and minimal['disc']
             recommended['processor'] = current_computer.processor.rating >= if_none(app.rec_cpu_rating, 0) and current_computer.processor.cores >= if_none(app.rec_cpu_cores, 0) and current_computer.processor.frequency >= if_none(app.rec_cpu_freq, 0)
             recommended['videocard'] = current_computer.videocard.rating >= if_none(app.rec_gpu_rating, 0) and current_computer.videocard.mem_volume >= if_none(app.rec_gpu_volume, 0)
-            recommended['memory'] = current_computer.memory.volume >= if_none(app.rec_ram_volume, 0)
+            recommended['memory'] = current_computer.memory.volume * current_computer.memory_cnt >= if_none(app.rec_ram_volume, 0)
             flag = False
             for id in current_computer.discs:
                 disc = Disc.objects.get(pk=id)
