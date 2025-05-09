@@ -23,3 +23,5 @@ django-crispy-forms
 crispy-bootstrap5
 
 django-guest-user
+
+pytz

@@ -33,16 +33,18 @@
           <img src="{% static 'images/logo.png' %}" alt="logo" id="navbar_logo" >
         </div>
         {% if '/login' not in request.path and '/register' not in request.path and '/convert' not in request.path %}
-          {% if '/welcome' not in request.path %}
-            <div class="navigation_button">
-                <a href="{% url 'welcome' %}">Главная</a>
-            </div>
-          {% endif %}
-          {% if '/assemble' not in request.path %}
-            <div class="navigation_button">
-                <a href="{% url 'assemble' %}">Конфигуратор</a>
-            </div>
-          {% endif %}
+          <div class="navigation_button">
+              <a href="{% url 'welcome' %}">Главная</a>
+          </div>
+          <div class="navigation_button">
+              <a href="{% url 'assemble' %}">Ручная сборка</a>
+          </div>
+          <div class="navigation_button">
+            <a href="{% url 'select_apps' %}">Умный конфигуратор</a>
+          </div>
+          <div class="navigation_button">
+            <a href="{% url 'get_info' %}">Личный кабинет</a>
+          </div>
           <div id="log_button">
             {% load guest_user %}
             {% if user.is_authenticated and not user|is_guest_user %}

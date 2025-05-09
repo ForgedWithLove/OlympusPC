@@ -1,7 +1,7 @@
 {% extends "base_template.html" %}
 
 {% block content %}
-<form method="GET" action="{% url 'auto_configuration' %}">
+<form method="GET" action="{% url 'auto_showcase' %}">
     {% csrf_token %}
     <input type="hidden" name="selected_apps" value="{{ selected_apps }}">
     <div class="top_bar" style="background-color: cyan; height: 50px;">

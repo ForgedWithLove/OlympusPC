@@ -74,3 +74,31 @@ def get_casecooler_name(casecoolers, side):
         return f'{casecoolers[side].manufacturer.name} {casecoolers[side].model}'
     else:
         return casecoolers[side].model
+
+@register.filter
+def mult(a, b):
+    return a * b
+
+@register.filter
+def assembly_to_str(assembly):
+    return {
+        'processor' : assembly.processor.id,
+        'motherboard' : assembly.motherboard.id,
+        'videocard' : assembly.videocard.id,
+        'memory' : assembly.memory.id,
+        'memory_cnt' : assembly.memory_cnt,
+        'powersupply' : assembly.powersupply.id,
+        'case' :  assembly.case.id,
+        'cooler' : assembly.cooler.id,
+        'casecoolers' : assembly.casecoolers,
+        'discs' : assembly.discs,
+        'price' : assembly.price
+    }
+
+@register.filter
+def get_json_count(json_str, key):
+    return json.loads(json_str)[key]['Количество']
+
+@register.filter
+def get_json_size(json_str, key):
+    return json.loads(json_str)[key]['Размер']

@@ -34,7 +34,14 @@ urlpatterns = [
     path("logout/", views.logout_request, name="logout"),
     path("convert/", views.convert_request, name="guest_to_user"),
     path('assemble/manual', views.assemble, name='assemble'),
+    path('assemble/save', views.save_assembly, name='save_assembly'),
     path('assemble/auto/apps', views.select_apps, name='select_apps'),
     path('assemble/auto/chars', views.select_chars, name='select_chars'),
+    path('assemble/auto/showcase', views.auto_showcase, name='auto_showcase'),
     path('assemble/auto/configuration', views.auto_configuration, name='auto_configuration'),
+    path('personal/', views.get_info, name='get_info'),
+    path('personal/activate', views.activate_assembly, name='activate_assembly'),
+    path('personal/analysis', views.assembly_analysis, name='assembly_analysis'),
+    path('personal/delete', views.delete_assembly, name='delete_assembly'),
+
 ]

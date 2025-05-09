@@ -10,7 +10,12 @@
                 {{ login_form|crispy }}                    
                 <button class="btn btn-primary" type="submit">Войти</button>
             </form>
-            <p class="text-center"><a href="{% url 'register' %}">Зарегистрируйтесь</a>, если у вас ещё нет учетной записи.</p>
+            {% load guest_user %}
+            {% if not user|is_guest_user %}
+                <p class="text-center"><a href="{% url 'register' %}">Зарегистрируйтесь</a>, если у вас ещё нет учетной записи.</p>
+            {% else %}
+                <p class="text-center"><a href="{% url 'guest_to_user' %}">Зарегистрируйтесь</a>, если у вас ещё нет учетной записи.</p>
+            {% endif %}
         </div>
     </div>
 

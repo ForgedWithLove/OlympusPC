@@ -165,4 +165,4 @@ AUTHENTICATION_BACKENDS = [
 
 CONVERT_FORM = 'pc_configurator.forms.GuestToUserForm'
 CONVERT_URL = 'guest_to_user'
-CONVERT_REDIRECT_URL = 'assemble'
+CONVERT_REDIRECT_URL = 'get_info'

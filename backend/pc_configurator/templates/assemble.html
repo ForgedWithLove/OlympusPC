@@ -190,44 +190,187 @@
         </div>
     </div>
     <div id="field">
-        <div id="processor_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <form method="POST" action="{% url 'assemble' %}" style="position: absolute; position: absolute; top: 50px; left: 50%; transform: translate(-50%, 0); width: 200px; height: 40px;"> 
+            {% csrf_token %}
+            <input type="submit" value="Новая сборка" class="link centered" style="width: 100%; height: 100%; border: none;">
+        </form>
+        <div id="processor_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.processor %}
-                {{ current_computer.processor.socket }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Сокет: {{ current_computer.processor.socket }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во ядер: {{ current_computer.processor.cores }}</div>
+                {% if current_computer.processor.e_cores > 0 %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Производительных ядер: {{ current_computer.processor.p_cores }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Энергоэффективных ядер: {{ current_computer.processor.e_cores }}</div>
+                {% endif %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во потоков: {{ current_computer.processor.threads }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тактовая частота: {{ current_computer.processor.frequency }} МГц</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Частота в Turbo-режиме: {{ current_computer.processor.turbo_freq }} МГц</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разблокированный множитель: {{ current_computer.processor.unlocked|bool_to_str }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Интегрированное графическое ядро: {{ current_computer.processor.int_graphics|bool_to_str }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тепловыделение: {{ current_computer.processor.tdp }} Вт</div>
             {% endif %}
         </div>
-        <div id="motherboard_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="motherboard_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.motherboard %}
-                {{ current_computer.motherboard.socket }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Сокет: {{ current_computer.motherboard.socket }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Чипсет: {{ current_computer.motherboard.chipset }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Форм-фактор: {{ current_computer.motherboard.formfactor }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип памяти: {{ current_computer.motherboard.mem_type }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов памяти: {{ current_computer.motherboard.mem_slots }}</div>
+                {% if current_computer.motherboard.wifi_ver is not None %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия WiFi: {{ current_computer.motherboard.wifi_ver }}</div>
+                {% endif %}
+                {% if current_computer.motherboard.bluetooth_ver is not None %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия Bluetooth: {{ current_computer.motherboard.bluetooth_ver }}</div>
+                {% endif %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во портов SATA: {{ current_computer.motherboard.sata_ports }}</div>
+                {% load custom_filters %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннекторы:</div>
+                {% if current_computer.motherboard.connectors|key_in_json:'3-pin argb-5v' %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — ARGB 5V (3-pin): {{ current_computer.motherboard.connectors|get_json_value:'3-pin argb-5v' }}</div>
+                {% endif %}
+                {% if current_computer.motherboard.connectors|key_in_json:'4-pin rgb-12v' %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — RGB 12V (4-pin): {{ current_computer.motherboard.connectors|get_json_value:'4-pin rgb-12v' }}</div>
+                {% endif %}
+                {% if current_computer.motherboard.connectors|key_in_json:'4-pin pwm' %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — PWM (4-pin): {{ current_computer.motherboard.connectors|get_json_value:'4-pin pwm' }}</div>
+                {% endif %}
+                {% if current_computer.motherboard.connectors|key_in_json:'8-pin atx-12v' %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — ATX 12V (8-pin): {{ current_computer.motherboard.connectors|get_json_value:'8-pin atx-12v' }}</div>
+                {% endif %}
+                {% if current_computer.motherboard.connectors|key_in_json:'8-pin pcie' %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — PCI-E (8-pin): {{ current_computer.motherboard.connectors|get_json_value:'8-pin pcie' }}</div>
+                {% endif %}
+                {% if current_computer.motherboard.backports %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разъёмы на задней панели:</div>
+                    {% for key in current_computer.motherboard.backports|get_json_keys %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ current_computer.motherboard.backports|get_json_value:key }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов PCI-Ex16: {{ current_computer.motherboard.pciex16_slots }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия PCI-Ex16: {{ current_computer.motherboard.pciex16_ver }}</div>
+                <div style='padding: 5px; font-size: 12pt;'>Кол-во слотов M.2: {{ current_computer.motherboard.m2_slots }}</div>
             {% endif %}
         </div>
-        <div id="videocard_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="videocard_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.videocard %}
-                {{ current_computer.videocard.mem_volume }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Графический процессор: {{ current_computer.videocard.chip_manufacturer.name }} {{ current_computer.videocard.chip }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия PCI-E: {{ current_computer.videocard.pciex16_ver }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Частота граф.процессора: {{ current_computer.videocard.frequency }} МГц</div>
+                {% if current_computer.videocard.boost_freq %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Частота граф.процессора (Boost): {{ current_computer.videocard.boost_freq }} МГц</div>
+                {% endif %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Объём видеопамяти: {{ current_computer.videocard.mem_volume }} Гб</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип видеопамяти: {{ current_computer.videocard.mem_type }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Ширина шины: {{ current_computer.videocard.bus_width }} бит</div>
+                {% if current_computer.videocard.bandwidth %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Пропускная способность: {{ current_computer.videocard.bandwidth }} Гб/c</div>
+                {% endif %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во поддерживаемых мониторов: {{ current_computer.videocard.max_monitors }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Количество занимаемых слотов: {{ current_computer.videocard.exp_slots }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Длина: {{ current_computer.videocard.length }} мм</div>
+                {% load custom_filters %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разъёмы:</div>
+                {% for key in current_computer.videocard.backports|get_json_keys %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ current_computer.videocard.backports|get_json_value:key }}</div>
+                {% endfor %}
+                {% if current_computer.videocard.power_pins %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разъём питания:</div>
+                    {% for key in current_computer.videocard.power_pins|get_json_keys %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ current_computer.videocard.power_pins|get_json_value:key }}</div>
+                    {% endfor %}
+                {% endif %}
             {% endif %}
         </div>
-        <div id="memory_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="memory_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.memory %}
-                {{ current_computer.memory.volume }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип памяти: {{ current_computer.memory.mem_type }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Объём модуля: {{ current_computer.memory.volume }} Гб</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тактовая частота: {{ current_computer.memory.frequency }} МГц</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Пропускная способность: {{ current_computer.memory.bandwidth }} Мб/с</div>                    
+                <div style='padding: 5px; font-size: 12pt;'>Латентность: {{ current_computer.memory.latency }}</div>
             {% endif %}
         </div>
-        <div id="cooler_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="cooler_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.cooler %}
-                {{ current_computer.cooler.power }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип охлаждения: {{ current_computer.cooler.coolant|coolant_output }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Сокеты: {{ current_computer.cooler.sockets|array_output:32 }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Мощность: {{ current_computer.cooler.power }} Вт</div>
+                {% if current_computer.cooler.connectors %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннекторы: {{current_computer.cooler.connectors}}</div>
+                {% endif %}    
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Высота: {{ current_computer.cooler.height }} мм</div>    
+                <div style='padding: 5px; font-size: 12pt;'>Уровень шума: {{ current_computer.cooler.noise_level }} дБ</div>
             {% endif %}
         </div>
-        <div id="case_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="case_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.case %}
-                {{ current_computer.case.typesize }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Типоразмер: {{ current_computer.case.typesize }}</div>
+                {% load custom_filters %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Форм-фактор мат.платы: {{ current_computer.case.mb_ffs|array_output:32 }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Формат блока питания: {{ current_computer.case.psu_typesize|array_output:32 }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов 3.5': {{ current_computer.case.big_sata_slots }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов 2.5': {{ current_computer.case.small_sata_slots }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Максимальная длина видеокрты: {{ current_computer.case.max_gpu_length }} мм</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Максимальная высота кулера: {{ current_computer.case.max_cooler_height }} мм</div>
+                {% if current_computer.case.max_psu_length %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Максимальная длина блока питания: {{ current_computer.case.max_psu_length }} мм</div>
+                {% endif %}    
+                {% if current_computer.case.front_interfaces %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разъёмы передней панели:</div>
+                    {% for key in current_computer.case.front_interfaces|get_json_keys %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ current_computer.case.front_interfaces|get_json_value:key }}</div>
+                    {% endfor %}
+                {% endif %}  
+                {% if current_computer.case.cooler_slots %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Места для вентиляторов:</div>
+                    {% for key in current_computer.case.cooler_slots|get_json_keys %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ current_computer.case.cooler_slots|get_json_count:key }}x{{ current_computer.case.cooler_slots|get_json_size:key }} мм</div>
+                    {% endfor %}
+                {% endif %}  
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов расширения: {{ current_computer.case.exp_slots }}</div>
+                {% if current_computer.case.width %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Габариты:</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Ширина: {{ current_computer.case.width }} мм</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Высота: {{ current_computer.case.height }} мм</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — Глубина: {{ current_computer.case.length }} мм</div>
+                {% endif %}    
+                {% if current_computer.case.mass %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Масса: {{ current_computer.case.mass }} кг</div>
+                {% endif %}    
             {% endif %}
         </div>
-        <div id="discs_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="discs_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if discs|array_len > 0 %}
-                {{ discs }}
+                {% for disc in discs %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>{{ disc.manufacturer.name }} {{ disc.model }}</div>
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип: {{ disc.type }}</div>
+                    {% if disc.rd_speed %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Скорость чтения: {{ disc.rd_speed }} Мб/с</div>
+                    {% endif %}
+                    {% if disc.wr_speed %}
+                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Скорость записи: {{ disc.wr_speed }} Мб/с</div>
+                    {% endif %}  
+                    <div style='padding: 5px; font-size: 12pt;'>Объём накопителя: {{ disc.volume }} Гб</div>
+                {% endfor %}  
             {% endif %}
         </div>
-        <div id="powersupply_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: brown; z-index: 5; flex-direction: column; justify-content: center;">
+        <div id="powersupply_info" style="display: none; top: 0px; left: 0px; position: absolute; width: 100%; height: 100%; background-color: rgba(238, 238, 238, 1); z-index: 5; flex-direction: column; justify-content: center;">
             {% if current_computer.powersupply %}
-                {{ current_computer.powersupply.power }}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Формат: {{ current_computer.powersupply.typesize }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Мощность: {{ current_computer.powersupply.power }} Вт</div>
+                {% if current_computer.powersupply.certificate %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Сертификат: {{ current_computer.powersupply.certificate.name }}</div>
+                {% endif %}
+                {% load custom_filters %}
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Отсоединяемые кабели: {{ current_computer.powersupply.modular_cables|bool_to_str }}</div>
+                <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннекторы:</div>
+                {% for key in current_computer.powersupply.connectors|get_json_keys %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ current_computer.powersupply.connectors|get_json_value:key }}</div>
+                {% endfor %}
+                {% if current_computer.powersupply.length %}
+                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Длина: {{ current_computer.powersupply.length }} мм</div>
+                {% endif %}
             {% endif %}
         </div>
         <div style="display: flex; align-items: center; justify-content: center; padding: 20px; background-color: purple;">
@@ -241,16 +384,53 @@
         </div>
     </div>
     <div id="configurator_info_panel">
-        {{ valid }}
-        {% for error in errors %}
-            <div>
-                {{ error }}
+        {% if not user|is_guest_user %}
+            <form method="POST" action="{% url 'save_assembly' %}" style="height: 106px;">
+                {% csrf_token %}
+                {% if current_computer.public %}
+                    <input type="checkbox" checked name="public" id='public_check' style="margin-top: 20px;">
+                {% else %}
+                    <input type="checkbox" name="public" id='public_check' style="margin-top: 20px;">
+                {% endif %}
+                <label for="public_check">Общий доступ</label></br>
+                <input name="name" type="text" placeholder="{{ current_computer.name }}" maxlength="24" style="margin-top: 5px;">
+                {% if valid  %}
+                    <input type="submit" value="Сохранить" class="link centered" style="width: 100%; border: none; margin-top: 5px;">
+                {% else %}
+                    <input disabled type="submit" value="Сохранить" class="link centered" style="width: 100%; border: none; margin-top: 5px;">
+                {% endif %}
+            </form>
+        {% endif %}
+        <div style="height: 14px;"></div>
+        <div style="height: calc(100% - 120px); width: 100%;">
+            <div style="display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%;">
+                {% if errors|array_len > 0 %}
+                    <div style="display: flex; flex-direction: column; align-items: center;height: 50%;">
+                        <div class="centered" style="width: calc(100% - 20px); padding: 7px;">Ошибки ({{errors|array_len}})</div>
+                        <div style="display: flex; flex-direction: column; align-items: center; overflow-y: scroll;">
+                            {% for error in errors %}
+                                <div style="width: calc(100% - 20px); padding: 7px;background-color: red;">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if warnings|array_len > 0 %}
+                    <div style="display: flex; flex-direction: column; align-items: center;height: 50%;">
+                        <div class="centered" style="width: calc(100% - 20px); padding: 7px;">Предупреждения ({{warnings|array_len}})</div>
+                        <div style="display: flex; flex-direction: column; align-items: center; overflow-y: scroll;">
+                            {% for warning in warnings %}
+                                <div style="width: calc(100% - 20px); padding: 7px; background-color: yellow;">
+                                    {{ warning }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
-        {% endfor %}
+        </div>
     </div>
-</div>
-<div>
-    Тут когда-нибудь будет шедевр
 </div>
 {% load static %}
 <script src="{% static 'javascript/assemble.js' %}"></script>

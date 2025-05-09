@@ -74,7 +74,10 @@
 
 #configurator_info_panel {
     width: 400px;
-    background-color: rgb(204, 71, 30);
+    background-color: rgb(91, 98, 207);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .component_light {
@@ -498,4 +501,85 @@
 
 .simple_checkbox:disabled {
     filter: brightness(80%);
+}
+
+.configure_button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 60px;
+    height: 60px;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-image: url('/pc_configurator/media/icons/configure.png');
+    background-size: auto calc(81% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.analysis_button {
+    width: 60px;
+    height: 60px;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-image: url('/pc_configurator/media/icons/analysis.png');
+    background-size: auto calc(90% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.back_button {
+    width: 60px;
+    height: 60px;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-image: url('/pc_configurator/media/icons/back.png');
+    background-size: auto calc(77% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.status_incorrect {
+    width: 60px;
+    height: 60px;
+    background-image: url('/pc_configurator/media/icons/incorrect_comp.png');
+    background-size: auto calc(81% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.status_temporary {
+    width: 60px;
+    height: 60px;
+    background-image: url('/pc_configurator/media/icons/temporary_comp.png');
+    background-size: auto calc(81% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.tick_field {
+    background-image: url('/pc_configurator/media/icons/tick.png');
+    background-size: auto calc(75% - 2px);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: rgb(32, 212, 32);
+}
+
+.cross_field {
+    background-image: url('/pc_configurator/media/icons/cross.png');
+    background-size: auto calc(75% - 2px);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: red;
+}
+
+.delete_button {
+    width: 40px;
+    height: 40px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-image: url('/pc_configurator/media/icons/trash.png');
+    background-size: auto calc(77% - 2px);
+    background-position: center;
+    background-repeat: no-repeat;
 }
