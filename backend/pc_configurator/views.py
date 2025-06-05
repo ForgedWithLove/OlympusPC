@@ -31,9 +31,10 @@ def assemble(request):
     try:
         current_computer = Computer.objects.get(user=request.user, active=True)
     except Computer.DoesNotExist:
-        try:
-            next_number = int(Computer.objects.filter(user=request.user, name__contains='Сборка №').order_by('-created').first().name.replace('Сборка №', '')) + 1
-        except Computer.DoesNotExist:
+        next_number = Computer.objects.filter(user=request.user, name__contains='Сборка №').order_by('-created').first()
+        if next_number is not None:
+            next_number = int(next_number.name.replace('Сборка №', '')) + 1
+        else:
             next_number = 1
         current_computer = Computer(
             user = request.user,

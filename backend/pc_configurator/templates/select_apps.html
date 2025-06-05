@@ -3,14 +3,14 @@
 {% block content %}
 <form method="GET" action="{% url 'select_chars' %}" id="apps_form">
     {% csrf_token %}
-    <div class="top_bar" style="background-color: cyan; height: 50px;">
+    <div class="top_bar" style="background-color: #9A777D; height: 50px;">
         <input type="submit" value="Далее" id="next_button">
     </div>
     <div style="display: flex; flex-direction: column; width: 100%;">
         {% for app_list in apps %}
             <div style="display: flex; flex-direction:row; align-items: flex-start; width: 100%;">
                 {% for app in app_list %}
-                    <div style="width: 20%; height: calc((100vh - 140px) / 2); background-color: gray;">
+                    <div style="width: 20%; height: calc((100vh - 140px) / 2); background-color: rgba(0,0,0,0.2);">
                         <div style="width: 100%; height: 100%; background: transparent;">
                             <div class="centered" style="width: 100%; height: 40%; padding-top: 20px;">
                                 <img src="{{ app.icon.url }}" style="max-width: 80%; max-height: 100%; padding: 10px;">
@@ -92,7 +92,7 @@
     }
 
     function styleEnabled (svg) {
-        svg.children[1].style.fill = 'rgba(0,255,3,0.8)';
+        svg.children[1].style.fill = 'rgba(255,255,255,0.75)';
         svg.children[2].style.fill = 'black';
     }
 
@@ -103,7 +103,7 @@
 
     function syncState (panel) {
         if (appChecked(panel)) {
-            panel.parentElement.parentElement.style.background = 'linear-gradient(45deg, rgba(174,255,0,0.5) 0%, rgba(178,232,40,0.5) 35%, rgba(3,255,0,0.5) 100%)';
+            panel.parentElement.parentElement.style.background = 'linear-gradient(225deg,rgba(181, 118, 129, 1) 0%, rgba(255, 153, 102, 0.87) 100%)';
             setName(panel);
         } else {
             panel.parentElement.parentElement.style.background = "transparent";

@@ -2,6 +2,33 @@
 
 {% block content %}
     <div id="comp_content">
+        <script>
+            function showDropdown(element) {
+                let timeout;
+                element.style.height = element.scrollHeight + 'px';
+                clearTimeout(timeout);
+                timeout = setTimeout(() => element.style.height = 'auto', 250); // Должно совпадать с transition
+            }
+    
+            function hideDropdown(element) {
+                let timeout;
+                clearTimeout(timeout);
+                element.style.height = element.scrollHeight + 'px';
+                timeout = setTimeout(() => element.style.height = 0, 0);
+            }
+    
+            function dropDownBehaviour(trigger, list) {
+                trigger.addEventListener("click", event => {
+                    if (list.style.height === '0px') {
+                        trigger.style.borderBottom = '1px solid black';
+                        showDropdown(list);
+                    } else {
+                        trigger.style.borderBottom = 'none';
+                        hideDropdown(list);
+                    }
+                });
+            }
+        </script>
         <div id="comp_filter_bar">
             {% block filters %}{% endblock %}
         </div>

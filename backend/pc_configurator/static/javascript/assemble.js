@@ -122,7 +122,7 @@ var casecooler_button = document.getElementById('casecooler_button');
 if (typeof(casecooler_button) != 'undefined' && casecooler_button != null)
 {
     casecooler_button.addEventListener("click", event => {
-        x = document.getElementById('casecooler_panel');
+        x = document.getElementById('casecooler_side_container');
         if (x.style.display === 'none') {
             x.style.display = 'flex';
           } else {

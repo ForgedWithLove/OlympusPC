@@ -5,37 +5,46 @@
         {% csrf_token %}
         <input type="hidden" name="prev_params" value="{{ params }}">
         <div class="comp_filter">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    Сортировка
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+            <div id="drop_btn_sort" style="width: 100%; height: 50px; display: flex; align-items: center; font-size: 18px;">
+                <div style="width: 50px; height: 50px; background-image: url('/pc_configurator/media/icons/arrow_down.png'); background-size: 52%; background-position: center; background-repeat: no-repeat;"></div>
+                Сортировка
+            </div>
+            <div id="drop_lst_sort" style="height: 0; transition: height 0.25s ease-out; overflow: hidden; width: 100%;">
+                <div style="margin-top: 7px; padding-left: 7px;">
                     <input type="radio" id="sort_default" name="sort" value="default" checked="true">
-                    <label for="sort_default">По умолчанию</label><br>
+                    <label for="sort_default">По умолчанию</label>
+                </div>
+                <div style="margin-top: 7px; padding-left: 7px;">
                     <input type="radio" id="sort_price_asc" name="sort" value="price_asc">
-                    <label for="sort_price_asc">По цене ↑</label><br>
+                    <label for="sort_price_asc">По цене ↑</label>
+                </div>
+                <div style="margin-top: 7px; padding-left: 7px;">
                     <input type="radio" id="sort_price_desc" name="sort" value="price_desc">
-                    <label for="sort_price_desc">По цене ↓</label><br>
-                </ul>
+                    <label for="sort_price_desc">По цене ↓</label>
+                </div>
             </div>
         </div>
         <div class="comp_filter">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    Сокет
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
-                    {% for socket in sockets %}
+            <div id="drop_btn_socket" style="width: 100%; height: 50px; display: flex; align-items: center; font-size: 18px;">
+                <div style="width: 50px; height: 50px; background-image: url('/pc_configurator/media/icons/arrow_down.png'); background-size: 52%; background-position: center; background-repeat: no-repeat;"></div>
+                Сокет
+            </div>
+            <div id="drop_lst_socket" style="height: 0; transition: height 0.25s ease-out; overflow: hidden; width: 100%;">
+                {% for socket in sockets %}
+                    <div style="margin-top: 7px; padding-left: 7px;">
                         <input type="checkbox" id="{{socket}}" name="socket" value="{{socket}}">
-                        <label for="{{socket}}">{{socket}}</label><br>
-                    {% endfor %}
-                </ul>
+                        <label for="{{socket}}">{{socket}}</label>
+                    </div>
+                {% endfor %}
             </div>
         </div>
         <input type="submit" value="Применить">
         <a href="{% url 'select_motherboard' %}">Сбросить фильтры</a>
-        
     </form>
+    <script>
+        dropDownBehaviour(document.getElementById('drop_btn_sort'), document.getElementById('drop_lst_sort'));
+        dropDownBehaviour(document.getElementById('drop_btn_socket'), document.getElementById('drop_lst_socket'));
+    </script>
 {% endblock %}
 
 {% block components %}
@@ -44,51 +53,51 @@
             <div class="comp_title">
                 <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ motherboard.manufacturer.name }} {{ motherboard.model }} </div>
             </div>
-            <div style="display: flex; flex-direction: row;">
+            <div style="display: flex; flex-direction: row; padding-top: 10px; padding-bottom: 10px;">
                 <div class="comp_img centered">
                     <img src="{{ motherboard.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
                 </div>
                 <div class="comp_chars">
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Сокет: {{ motherboard.socket }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Чипсет: {{ motherboard.chipset }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Форм-фактор: {{ motherboard.formfactor }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип памяти: {{ motherboard.mem_type }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов памяти: {{ motherboard.mem_slots }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия WiFi: {{ motherboard.wifi_ver }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия Bluetooth: {{ motherboard.bluetooth_ver }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во портов SATA: {{ motherboard.sata_ports }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Сокет: {{ motherboard.socket }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Чипсет: {{ motherboard.chipset }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Форм-фактор: {{ motherboard.formfactor }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Тип памяти: {{ motherboard.mem_type }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов памяти: {{ motherboard.mem_slots }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Версия WiFi: {{ motherboard.wifi_ver }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Версия Bluetooth: {{ motherboard.bluetooth_ver }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Кол-во портов SATA: {{ motherboard.sata_ports }}</div>
                     {% load custom_filters %}
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннекторы:</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Коннекторы:</div>
                     {% if motherboard.connectors|key_in_json:'3-pin argb-5v' %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — ARGB 5V (3-pin): {{ motherboard.connectors|get_json_value:'3-pin argb-5v' }}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — ARGB 5V (3-pin): {{ motherboard.connectors|get_json_value:'3-pin argb-5v' }}</div>
                     {% endif %}
                     {% if motherboard.connectors|key_in_json:'4-pin rgb-12v' %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — RGB 12V (4-pin): {{ motherboard.connectors|get_json_value:'4-pin rgb-12v' }}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — RGB 12V (4-pin): {{ motherboard.connectors|get_json_value:'4-pin rgb-12v' }}</div>
                     {% endif %}
                     {% if motherboard.connectors|key_in_json:'4-pin pwm' %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — PWM (4-pin): {{ motherboard.connectors|get_json_value:'4-pin pwm' }}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — PWM (4-pin): {{ motherboard.connectors|get_json_value:'4-pin pwm' }}</div>
                     {% endif %}
                     {% if motherboard.connectors|key_in_json:'8-pin atx-12v' %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — ATX 12V (8-pin): {{ motherboard.connectors|get_json_value:'8-pin atx-12v' }}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — ATX 12V (8-pin): {{ motherboard.connectors|get_json_value:'8-pin atx-12v' }}</div>
                     {% endif %}
                     {% if motherboard.connectors|key_in_json:'8-pin pcie' %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — PCI-E (8-pin): {{ motherboard.connectors|get_json_value:'8-pin pcie' }}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — PCI-E (8-pin): {{ motherboard.connectors|get_json_value:'8-pin pcie' }}</div>
                     {% endif %}
                     {% if motherboard.internal_usb %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Внутренние порты USB:</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Внутренние порты USB:</div>
                         {% for key in motherboard.internal_usb|get_json_keys %}
-                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ motherboard.internal_usb|get_json_value:key }}</div>
+                            <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ motherboard.internal_usb|get_json_value:key }}</div>
                         {% endfor %}
                     {% endif %}
                     {% if motherboard.backports %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Разъёмы на задней панели:</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Разъёмы на задней панели:</div>
                         {% for key in motherboard.backports|get_json_keys %}
-                            <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ motherboard.backports|get_json_value:key }}</div>
+                            <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> — {{ key }}: {{ motherboard.backports|get_json_value:key }}</div>
                         {% endfor %}
                     {% endif %}
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов PCI-Ex16: {{ motherboard.pciex16_slots }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Версия PCI-Ex16: {{ motherboard.pciex16_ver }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов PCI-Ex1: {{ motherboard.pciex1_slots }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов PCI-Ex16: {{ motherboard.pciex16_slots }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Версия PCI-Ex16: {{ motherboard.pciex16_ver }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Кол-во слотов PCI-Ex1: {{ motherboard.pciex1_slots }}</div>
                     <div style='padding: 5px; font-size: 12pt;'>Кол-во слотов M.2: {{ motherboard.m2_slots }}</div>
                 </div>
                 <div class="comp_add">

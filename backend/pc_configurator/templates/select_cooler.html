@@ -5,38 +5,47 @@
         {% csrf_token %}
         <input type="hidden" name="prev_params" value="{{ params }}">
         <div class="comp_filter">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    Сортировка
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
+            <div id="drop_btn_sort" style="width: 100%; height: 50px; display: flex; align-items: center; font-size: 18px;">
+                <div style="width: 50px; height: 50px; background-image: url('/pc_configurator/media/icons/arrow_down.png'); background-size: 52%; background-position: center; background-repeat: no-repeat;"></div>
+                Сортировка
+            </div>
+            <div id="drop_lst_sort" style="height: 0; transition: height 0.25s ease-out; overflow: hidden; width: 100%;">
+                <div style="margin-top: 7px; padding-left: 7px;">
                     <input type="radio" id="sort_default" name="sort" value="default" checked="true">
-                    <label for="sort_default">По умолчанию</label><br>
+                    <label for="sort_default">По умолчанию</label>
+                </div>
+                <div style="margin-top: 7px; padding-left: 7px;">
                     <input type="radio" id="sort_price_asc" name="sort" value="price_asc">
-                    <label for="sort_price_asc">По цене ↑</label><br>
+                    <label for="sort_price_asc">По цене ↑</label>
+                </div>
+                <div style="margin-top: 7px; padding-left: 7px;">
                     <input type="radio" id="sort_price_desc" name="sort" value="price_desc">
-                    <label for="sort_price_desc">По цене ↓</label><br>
-                </ul>
+                    <label for="sort_price_desc">По цене ↓</label>
+                </div>
             </div>
         </div>
         <div class="comp_filter">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    Тип охлаждения
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="z-index: 1;">
-                    {% for coolant in coolants %}
+            <div id="drop_btn_coolant" style="width: 100%; height: 50px; display: flex; align-items: center; font-size: 18px;">
+                <div style="width: 50px; height: 50px; background-image: url('/pc_configurator/media/icons/arrow_down.png'); background-size: 52%; background-position: center; background-repeat: no-repeat;"></div>
+                Тип охлаждения
+            </div>
+            <div id="drop_lst_coolant" style="height: 0; transition: height 0.25s ease-out; overflow: hidden; width: 100%;">
+                {% for coolant in coolants %}
+                    <div style="margin-top: 7px; padding-left: 7px;">
                         <input type="checkbox" id="{{coolant}}" name="coolant" value="{{coolant}}">
                         {% load custom_filters %}
-                        <label for="{{coolant}}">{{coolant|coolant_output}}</label><br>
-                    {% endfor %}
-                </ul>
+                        <label for="{{coolant}}">{{coolant|coolant_output}}</label>
+                    </div>
+                {% endfor %}
             </div>
         </div>
         <input type="submit" value="Применить">
         <a href="{% url 'select_cooler' %}">Сбросить фильтры</a>
-        
     </form>
+    <script>
+        dropDownBehaviour(document.getElementById('drop_btn_sort'), document.getElementById('drop_lst_sort'));
+        dropDownBehaviour(document.getElementById('drop_btn_coolant'), document.getElementById('drop_lst_coolant'));
+    </script>
 {% endblock %}
 
 {% block components %}
@@ -45,23 +54,23 @@
             <div class="comp_title">
                 <div style="padding-top: 5px; padding-bottom: 5px; font-size: 16pt; font-weight: semi-bold;"> {{ cooler.manufacturer.name }} {{ cooler.model }} </div>
             </div>
-            <div style="display: flex; flex-direction: row;">
+            <div style="display: flex; flex-direction: row; padding-top: 10px; padding-bottom: 10px;">
                 <div class="comp_img centered">
                     <img src="{{ cooler.image.url }}" style="max-height: 220px; max-width: 220px; height: auto; width: auto; padding: 10px;">
                 </div>
                 <div class="comp_chars">
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Тип охлаждения: {{ cooler.coolant|coolant_output }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Сокеты: {{ cooler.sockets|array_output:32 }}</div>
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Мощность: {{ cooler.power }} Вт</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Тип охлаждения: {{ cooler.coolant|coolant_output }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt; white-space: pre-line;'>Сокеты: {{ cooler.sockets|array_output:32 }}</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Мощность: {{ cooler.power }} Вт</div>
                     {% if cooler.connectors %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Коннекторы: {{cooler.connectors}}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Коннекторы: {{cooler.connectors}}</div>
                     {% endif %}    
                     {% if cooler.modular_joint %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> Модульное соединение: Да</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> Модульное соединение: Да</div>
                     {% endif %}
-                    <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'>Высота: {{ cooler.height }} мм</div>
+                    <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'>Высота: {{ cooler.height }} мм</div>
                     {% if cooler.radiator_size %}
-                        <div style='padding-top: 5px; padding-left: 5px; font-size: 12pt;'> Размер радиатора: {{ cooler.radiator_size }}</div>
+                        <div style='padding-top: 7px; padding-left: 5px; font-size: 12pt;'> Размер радиатора: {{ cooler.radiator_size }}</div>
                     {% endif %}          
                     <div style='padding: 5px; font-size: 12pt;'>Уровень шума: {{ cooler.noise_level }} дБ</div>
                 </div>
