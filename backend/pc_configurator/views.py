@@ -829,9 +829,6 @@ def auto_showcase(request):
             processor_qs = processor_qs.filter(socket = params['socket'])
             motherboard_qs = motherboard_qs.filter(socket = params['socket'])
             cooler_qs = cooler_qs.filter(sockets__contains = [params['socket']])
-        if 'nodiscrete' in params.keys():
-            #---------------------------------------------------------------
-            pass
         if 'videochip' in params.keys():
             videocard_qs = videocard_qs.filter(chip = params['videochip'])
         if 'maxmonitors' in params.keys():
@@ -857,7 +854,7 @@ def auto_showcase(request):
         if 'wifi' in params.keys():
             motherboard_qs = motherboard_qs.filter(wifi_ver__isnull = False).filter(bluetooth_ver__isnull = False)
         if 'maxprice' in params.keys():
-            #---------------------------------------------------------------
+            #!!!
             pass    
         if (len(processor_qs) == 0 or 
             len(motherboard_qs) == 0 or
@@ -869,7 +866,7 @@ def auto_showcase(request):
             len(casecooler_qs) == 0 or
             len(powersupply_qs) == 0
         ):
-            #----------------------------------------------------------------------------
+            #!!!
             print('Невозможно автоматически создать сборку с указанными характеристиками.')
             return redirect('assemble')
 
@@ -936,7 +933,7 @@ def auto_showcase(request):
             len(casecooler_qs) == 0 or
             len(powersupply_qs) == 0
         ):
-            #----------------------------------------------------------------------------
+            #!!!
             print('Невозможно автоматически создать сборку с указанными характеристиками.')
             return redirect('assemble')
 

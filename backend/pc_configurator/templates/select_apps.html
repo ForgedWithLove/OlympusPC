@@ -10,7 +10,7 @@
         {% for app_list in apps %}
             <div style="display: flex; flex-direction:row; align-items: flex-start; width: 100%;">
                 {% for app in app_list %}
-                    <div style="width: 20%; height: calc((100vh - 140px) / 2); background-color: rgba(0,0,0,0.2);">
+                    <div style="width: 20%; height: calc((100vh - 140px) / 2); background-color: rgba(0,0,0,0.05);">
                         <div style="width: 100%; height: 100%; background: transparent;">
                             <div class="centered" style="width: 100%; height: 40%; padding-top: 20px;">
                                 <img src="{{ app.icon.url }}" style="max-width: 80%; max-height: 100%; padding: 10px;">
@@ -103,7 +103,7 @@
 
     function syncState (panel) {
         if (appChecked(panel)) {
-            panel.parentElement.parentElement.style.background = 'linear-gradient(225deg,rgba(181, 118, 129, 1) 0%, rgba(255, 153, 102, 0.87) 100%)';
+            panel.parentElement.parentElement.style.background = 'linear-gradient(225deg, rgba(181, 118, 129, 0.6) 0%, rgba(255, 153, 102, 0.6) 100%)';
             setName(panel);
         } else {
             panel.parentElement.parentElement.style.background = "transparent";
